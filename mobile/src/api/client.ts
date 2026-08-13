@@ -1,17 +1,15 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Local Wi-Fi IPv4 address for physical devices and ADB reverse compatibility
-// For physical phone: use 192.168.29.135:5000 or localhost:5000 (via adb reverse tcp:5000 tcp:5000)
-// For Android Emulator: 10.0.2.2:5000 or localhost:5000
-export const API_BASE_URL = 'http://192.168.29.135:5000/api';
+// Production API URL deployed on Render
+export const API_BASE_URL = 'https://to-do-app-c30v.onrender.com/api';
 
 const client = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 15000,
 });
 
 let authToken: string | null = null;
