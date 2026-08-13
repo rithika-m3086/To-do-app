@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
   primaryButton: {
-    backgroundColor: '#3B82F6', // Sky Blue primary accent
+    backgroundColor: '#0077B6', // Ocean Blue primary accent
   },
   secondaryButton: {
     backgroundColor: '#ffffff',
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
   },
   dangerButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: '#EF4444',
   },
   disabledButton: {
     backgroundColor: '#cbd5e1',

@@ -29,15 +29,15 @@ export interface ThemeColors {
 }
 
 export const lightColors: ThemeColors = {
-  background: 'transparent',
+  background: '#ffffff',
   card: '#ffffff',
-  cardGlass: 'rgba(255, 255, 255, 0.88)',
+  cardGlass: 'rgba(255, 255, 255, 0.95)',
   text: '#0F172A', // Deep slate navy
   textSecondary: '#475569',
-  border: 'rgba(255, 255, 255, 0.5)',
-  headerBackground: 'rgba(255, 255, 255, 0.75)',
-  inputBackground: 'rgba(255, 255, 255, 0.9)',
-  primary: '#0284C7', // Cyan / Ocean Blue
+  border: '#e2e8f0',
+  headerBackground: 'rgba(255, 255, 255, 0.85)',
+  inputBackground: '#ffffff',
+  primary: '#0077B6', // Ocean Blue
   danger: '#EF4444',
   // Priority Mapping
   highPriorityBg: '#FFEAD9',
@@ -45,34 +45,34 @@ export const lightColors: ThemeColors = {
   mediumPriorityBg: '#FCE4EC',
   mediumPriorityTag: '#E6399B',
   lowPriorityBg: '#E0F2FE',
-  lowPriorityTag: '#0284C7',
+  lowPriorityTag: '#0077B6',
   // Feature Cards
-  lavenderCard: 'rgba(234, 227, 255, 0.92)',
+  lavenderCard: '#EAE3FF',
   lavenderText: '#5C3BFF',
-  orangeCard: 'rgba(255, 232, 214, 0.92)',
-  orangeText: '#FF6B00',
+  orangeCard: '#FFEAD9',
+  orangeText: '#FF6B35',
 };
 
 export const darkColors: ThemeColors = {
-  background: '#121212',
-  card: '#1E1E1E',
-  cardGlass: 'rgba(30, 30, 30, 0.92)',
+  background: '#000000', // Pure pitch black
+  card: '#121212', // Dark card container
+  cardGlass: '#18181B',
   text: '#F8FAFC',
-  textSecondary: '#94A3B8',
-  border: '#2A2A2A',
-  headerBackground: '#181818',
-  inputBackground: '#2A2A2A',
-  primary: '#3B82F6',
+  textSecondary: '#A1A1AA',
+  border: '#27272A',
+  headerBackground: '#09090B',
+  inputBackground: '#18181B',
+  primary: '#0077B6',
   danger: '#EF4444',
-  highPriorityBg: '#7C2D12',
+  highPriorityBg: '#451a03',
   highPriorityTag: '#FF6B35',
-  mediumPriorityBg: '#831843',
+  mediumPriorityBg: '#500724',
   mediumPriorityTag: '#E6399B',
   lowPriorityBg: '#075985',
   lowPriorityTag: '#38BDF8',
-  lavenderCard: '#2E1065',
+  lavenderCard: '#1e1b4b',
   lavenderText: '#C084FC',
-  orangeCard: '#7C2D12',
+  orangeCard: '#451a03',
   orangeText: '#FDBA74',
 };
 
@@ -88,7 +88,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = 'user_theme_preference';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // Always default to Light Mode on startup
+  // Default to Light Mode on startup
   const [theme, setTheme] = useState<ThemeMode>('light');
 
   useEffect(() => {

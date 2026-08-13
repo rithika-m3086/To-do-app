@@ -108,12 +108,12 @@ const styles = StyleSheet.create({
   card: {
     padding: 24,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    elevation: 4,
+    backgroundColor: '#ffffff',
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
   },
   title: {
     fontSize: 26,
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
   },
   serverError: {
     fontSize: 13,
-    color: '#ef4444',
-    backgroundColor: '#fee2e2',
+    color: '#EF4444',
+    backgroundColor: '#FEE2E2',
     padding: 12,
     borderRadius: 12,
     marginBottom: 16,
@@ -144,6 +144,6 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#0284C7',
+    color: '#0077B6',
   },
 });

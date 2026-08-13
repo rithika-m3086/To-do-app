@@ -40,26 +40,26 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const completedSubTasks = task.subTasks?.filter((st) => st.completed).length || 0;
   const subTaskPercent = totalSubTasks > 0 ? Math.round((completedSubTasks / totalSubTasks) * 100) : 0;
 
-  // Priority color styling based on extracted mesh gradient palette
+  // Priority color palette (High: Orange #FF6B35, Medium: Pink #E6399B, Low: Ocean Blue #0077B6)
   const getPriorityStyle = () => {
     switch (task.priority) {
       case 'high':
         return {
           bg: colors.highPriorityBg,
-          tagBg: colors.highPriorityTag,
-          text: isDark ? '#FF6B35' : '#C2410C',
+          tagBg: '#FF6B35',
+          text: '#FF6B35',
         };
       case 'medium':
         return {
           bg: colors.mediumPriorityBg,
-          tagBg: colors.mediumPriorityTag,
-          text: isDark ? '#E6399B' : '#BE185D',
+          tagBg: '#E6399B',
+          text: '#E6399B',
         };
       default:
         return {
           bg: colors.lowPriorityBg,
-          tagBg: colors.lowPriorityTag,
-          text: isDark ? '#38BDF8' : '#1D4ED8',
+          tagBg: '#0077B6',
+          text: '#0077B6',
         };
     }
   };
@@ -68,9 +68,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
   const getCategoryColor = () => {
     switch (task.category) {
-      case 'Work': return { bg: '#E0F2FE', text: '#0284C7' };
+      case 'Work': return { bg: '#E0F2FE', text: '#0077B6' };
       case 'Study': return { bg: '#EAE3FF', text: '#5C3BFF' };
-      case 'Personal': return { bg: '#FCE7F3', text: '#BE185D' };
+      case 'Personal': return { bg: '#FCE4EC', text: '#E6399B' };
       case 'Fitness': return { bg: '#DCFCE7', text: '#15803D' };
       default: return { bg: '#F1F5F9', text: '#475569' };
     }
@@ -83,8 +83,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       style={[
         styles.card,
         {
-          backgroundColor: isDark ? colors.card : colors.cardGlass,
-          borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)',
+          backgroundColor: isDark ? '#121212' : colors.cardGlass,
+          borderColor: isDark ? '#27272A' : '#e2e8f0',
         },
       ]}
     >
@@ -171,7 +171,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               <Text style={[styles.progressTitle, { color: isDark ? colors.textSecondary : '#64748b' }]}>Progress</Text>
               <Text style={[styles.progressPercentText, { color: colors.text }]}>{subTaskPercent}%</Text>
             </View>
-            <View style={[styles.track, { backgroundColor: isDark ? '#3b3b3b' : 'rgba(0, 0, 0, 0.08)' }]}>
+            <View style={[styles.track, { backgroundColor: isDark ? '#27272A' : '#e2e8f0' }]}>
               <View
                 style={[
                   styles.fill,
@@ -184,10 +184,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       ) : null}
 
       {/* Bottom info row with deadline time pill & quick actions */}
-      <View style={[styles.cardFooter, { borderTopColor: isDark ? '#2a2a2a' : 'rgba(0, 0, 0, 0.06)' }]}>
+      <View style={[styles.cardFooter, { borderTopColor: isDark ? '#27272A' : '#f1f5f9' }]}>
         <View style={styles.footerLeft}>
           {task.deadline ? (
-            <View style={styles.timePill}>
+            <View style={[styles.timePill, { backgroundColor: isDark ? '#18181B' : '#ffffff' }]}>
               <Text style={styles.timePillText}>
                 ⏰ {formatTime(task.deadline) || formatDate(task.deadline)}
               </Text>
@@ -367,7 +367,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timePill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,

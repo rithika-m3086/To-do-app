@@ -123,7 +123,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
         {/* Header: Clean username and avatar only */}
         <View style={styles.header}>
           <View style={styles.profileRow}>
-            <View style={[styles.avatarCircle, { backgroundColor: '#0284C7' }]}>
+            <View style={[styles.avatarCircle, { backgroundColor: '#0077B6' }]}>
               <Text style={styles.avatarText}>{getUserName().charAt(0).toUpperCase()}</Text>
             </View>
             <Text style={[styles.userNameText, { color: colors.text }]}>{getUserName()}</Text>
@@ -131,14 +131,14 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
 
           <View style={styles.headerActions}>
             <TouchableOpacity
-              style={[styles.actionBadge, { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.85)' }]}
+              style={[styles.actionBadge, { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: isDark ? '#121212' : '#ffffff' }]}
               onPress={toggleTheme}
             >
               <Text style={styles.actionBadgeText}>{isDark ? '☀️' : '🌙'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionBadge, { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.85)' }]}
+              style={[styles.actionBadge, { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: isDark ? '#121212' : '#ffffff' }]}
               onPress={logout}
             >
               <Text style={styles.logoutText}>Logout</Text>
@@ -165,7 +165,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
           ListHeaderComponent={
             <View style={styles.dashboardTop}>
               {/* Search Bar */}
-              <View style={[styles.searchContainer, { backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.9)', borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)' }]}>
+              <View style={[styles.searchContainer, { backgroundColor: isDark ? '#121212' : '#ffffff', borderColor: isDark ? colors.border : '#e2e8f0' }]}>
                 <Text style={styles.searchIcon}>🔍</Text>
                 <TextInput
                   style={[styles.searchInput, { color: colors.text }]}
@@ -181,10 +181,10 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                 ) : null}
               </View>
 
-              {/* Feature Summary Cards (Vibrant Pastel Colors matching mesh theme) */}
+              {/* Feature Summary Cards */}
               <Text style={[styles.sectionTitle, { color: colors.text }]}>this week</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsScroll}>
-                {/* Lavender Accent Card: Background #EAE3FF, primary text #5C3BFF */}
+                {/* Lavender Accent Card */}
                 <View style={[styles.featureCard, { backgroundColor: colors.lavenderCard }]}>
                   <View style={styles.featureCardHeader}>
                     <View style={styles.featureIconBadge}>
@@ -198,7 +198,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                   <Text style={[styles.featureSubText, { color: colors.lavenderText }]}>{pendingCount} task</Text>
                 </View>
 
-                {/* Orange/Peach Accent Card: Background #FFE8D6, primary text #FF6B00 */}
+                {/* Vibrant Orange Accent Card */}
                 <View style={[styles.featureCard, { backgroundColor: colors.orangeCard }]}>
                   <View style={styles.featureCardHeader}>
                     <View style={styles.featureIconBadge}>
@@ -223,8 +223,8 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                       key={filter}
                       style={[
                         styles.filterPill,
-                        { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.88)' },
-                        isActive && { backgroundColor: '#0284C7', borderColor: '#0284C7' },
+                        { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: isDark ? '#121212' : '#ffffff' },
+                        isActive && { backgroundColor: '#0077B6', borderColor: '#0077B6' },
                       ]}
                       onPress={() => setActiveFilter(filter)}
                     >
@@ -232,7 +232,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                         {filter}
                       </Text>
                       <View style={[styles.countBadge, isActive && { backgroundColor: '#ffffff' }]}>
-                        <Text style={[styles.countBadgeText, isActive && { color: '#0284C7' }]}>{count}</Text>
+                        <Text style={[styles.countBadgeText, isActive && { color: '#0077B6' }]}>{count}</Text>
                       </View>
                     </TouchableOpacity>
                   );
@@ -249,7 +249,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                         key={cat}
                         style={[
                           styles.catPill,
-                          { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.85)' },
+                          { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: isDark ? '#121212' : '#ffffff' },
                           isActive && { backgroundColor: '#10b981', borderColor: '#10b981' },
                         ]}
                         onPress={() => setSelectedCategory(cat)}
@@ -276,7 +276,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
           ListEmptyComponent={
             isLoading ? (
               <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#0284C7" />
+                <ActivityIndicator size="large" color="#0077B6" />
               </View>
             ) : (
               <View style={styles.centerContainer}>
@@ -288,9 +288,9 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
           }
         />
 
-        {/* Floating Action Button (FAB in Ocean Blue #0284C7) */}
+        {/* Floating Action Button (FAB in Ocean Blue #0077B6) */}
         <TouchableOpacity
-          style={[styles.fabButton, { backgroundColor: '#0284C7' }]}
+          style={[styles.fabButton, { backgroundColor: '#0077B6' }]}
           onPress={handleAddTask}
           activeOpacity={0.85}
         >
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,
-    shadowColor: '#0284C7',
+    shadowColor: '#0077B6',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
