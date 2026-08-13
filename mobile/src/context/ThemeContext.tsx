@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ThemeMode = 'light' | 'dark';
@@ -14,30 +13,43 @@ export interface ThemeColors {
   inputBackground: string;
   primary: string;
   danger: string;
+  // Bubbly pastel card accents
+  lavenderCard: string;
+  lavenderText: string;
+  orangeCard: string;
+  orangeText: string;
 }
 
 export const lightColors: ThemeColors = {
-  background: '#ffffff',
+  background: '#F8F9FB',
   card: '#ffffff',
-  text: '#333333',
-  textSecondary: '#666666',
-  border: '#e0e0e0',
-  headerBackground: '#f9f9f9',
+  text: '#1e293b',
+  textSecondary: '#64748b',
+  border: '#f1f5f9',
+  headerBackground: '#F8F9FB',
   inputBackground: '#ffffff',
-  primary: '#0066cc',
-  danger: '#d32f2f',
+  primary: '#3B82F6',
+  danger: '#ef4444',
+  lavenderCard: '#EAE3FF',
+  lavenderText: '#5C3BFF',
+  orangeCard: '#FFE8D6',
+  orangeText: '#FF6B00',
 };
 
 export const darkColors: ThemeColors = {
   background: '#121212',
-  card: '#1e1e1e',
-  text: '#f5f5f5',
-  textSecondary: '#aaaaaa',
-  border: '#333333',
-  headerBackground: '#1a1a1a',
+  card: '#1E1E1E',
+  text: '#f8fafc',
+  textSecondary: '#94a3b8',
+  border: '#2a2a2a',
+  headerBackground: '#181818',
   inputBackground: '#2a2a2a',
-  primary: '#3b82f6',
+  primary: '#3B82F6',
   danger: '#ef4444',
+  lavenderCard: '#2e1065',
+  lavenderText: '#c084fc',
+  orangeCard: '#7c2d12',
+  orangeText: '#fdba74',
 };
 
 interface ThemeContextType {
@@ -52,20 +64,20 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = 'user_theme_preference';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const systemColorScheme = useColorScheme();
-  const [theme, setTheme] = useState<ThemeMode>(
-    systemColorScheme === 'dark' ? 'dark' : 'light'
-  );
+  // Always default to Light Mode on launch
+  const [theme, setTheme] = useState<ThemeMode>('light');
 
   useEffect(() => {
     const loadStoredTheme = async () => {
       try {
         const storedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-        if (storedTheme === 'light' || storedTheme === 'dark') {
-          setTheme(storedTheme);
+        if (storedTheme === 'dark') {
+          setTheme('dark');
+        } else {
+          setTheme('light');
         }
       } catch (e) {
-        // Fallback to initial state
+        setTheme('light');
       }
     };
     loadStoredTheme();

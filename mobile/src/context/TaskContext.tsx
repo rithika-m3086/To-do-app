@@ -22,6 +22,7 @@ interface TaskContextType extends TaskState {
   updateTask: (id: string, payload: UpdateTaskPayload) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
   toggleComplete: (task: Task) => Promise<void>;
+  toggleSubTask: (task: Task, subTaskIndex: number) => Promise<void>;
   clearTaskError: () => void;
 }
 
@@ -136,6 +137,14 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     await updateTask(task._id, { status: newStatus });
   };
 
+  const toggleSubTask = async (task: Task, subTaskIndex: number): Promise<void> => {
+    if (!task.subTasks || !task.subTasks[subTaskIndex]) return;
+    const updatedSubTasks = task.subTasks.map((st, i) =>
+      i === subTaskIndex ? { ...st, completed: !st.completed } : st
+    );
+    await updateTask(task._id, { subTasks: updatedSubTasks });
+  };
+
   const clearTaskError = () => {
     dispatch({ type: 'SET_ERROR', payload: null });
   };
@@ -149,6 +158,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         updateTask,
         deleteTask,
         toggleComplete,
+        toggleSubTask,
         clearTaskError,
       }}
     >

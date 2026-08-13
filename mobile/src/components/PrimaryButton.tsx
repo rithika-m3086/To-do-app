@@ -38,7 +38,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       style={[styles.button, getButtonStyle()]}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'secondary' ? '#333333' : '#ffffff'} />
@@ -51,25 +51,26 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    padding: 12,
-    borderRadius: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 6,
   },
   primaryButton: {
-    backgroundColor: '#0066cc',
+    backgroundColor: '#3B82F6', // Sky Blue primary accent
   },
   secondaryButton: {
     backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#e2e8f0',
   },
   dangerButton: {
-    backgroundColor: '#d32f2f',
+    backgroundColor: '#ef4444',
   },
   disabledButton: {
-    backgroundColor: '#cccccc',
+    backgroundColor: '#cbd5e1',
   },
   buttonText: {
     color: '#ffffff',
@@ -77,6 +78,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   secondaryText: {
-    color: '#333333',
+    color: '#475569',
   },
 });

@@ -14,7 +14,7 @@ export const PomodoroTimerModal: React.FC<PomodoroTimerModalProps> = ({
   task,
   onClose,
 }) => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const FOCUS_TIME_SECONDS = 25 * 60; // 25 minutes
   const [secondsLeft, setSecondsLeft] = useState(FOCUS_TIME_SECONDS);
   const [isActive, setIsActive] = useState(false);
@@ -60,9 +60,9 @@ export const PomodoroTimerModal: React.FC<PomodoroTimerModalProps> = ({
   if (!task) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={[styles.modalCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <View style={[styles.modalCard, { backgroundColor: colors.card, borderColor: isDark ? colors.border : '#e2e8f0' }]}>
           <Text style={[styles.modalHeader, { color: colors.text }]}>⏱️ Pomodoro Focus Session</Text>
           
           <Text style={[styles.taskTitle, { color: colors.primary }]} numberOfLines={2}>
@@ -88,7 +88,7 @@ export const PomodoroTimerModal: React.FC<PomodoroTimerModalProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.controlButton, styles.resetButton, { borderColor: colors.border }]}
+              style={[styles.controlButton, styles.resetButton, { borderColor: isDark ? colors.border : '#cbd5e1' }]}
               onPress={resetTimer}
             >
               <Text style={[styles.resetButtonText, { color: colors.text }]}>Reset</Text>
@@ -107,7 +107,7 @@ export const PomodoroTimerModal: React.FC<PomodoroTimerModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -115,10 +115,15 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 340,
-    borderRadius: 12,
+    borderRadius: 24,
     borderWidth: 1,
-    padding: 20,
+    padding: 24,
     alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   modalHeader: {
     fontSize: 18,
@@ -154,15 +159,15 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 16,
     alignItems: 'center',
   },
   startButton: {
     backgroundColor: '#16a34a',
   },
   pauseButton: {
-    backgroundColor: '#d97706',
+    backgroundColor: '#FF6B00',
   },
   resetButton: {
     backgroundColor: 'transparent',

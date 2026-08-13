@@ -14,7 +14,7 @@ export const AddEditTaskScreen: React.FC<Props> = ({ route, navigation }) => {
   const isEditing = !!existingTask;
 
   const { createTask, updateTask, error, clearTaskError } = useTasks();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (payload: CreateTaskPayload | UpdateTaskPayload) => {
@@ -39,7 +39,7 @@ export const AddEditTaskScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
-      <View style={[styles.header, { backgroundColor: colors.headerBackground, borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { backgroundColor: colors.headerBackground, borderBottomColor: isDark ? colors.border : '#e2e8f0' }]}>
         <Text style={[styles.title, { color: colors.text }]}>{isEditing ? 'Edit Task' : 'Create New Task'}</Text>
       </View>
 
@@ -62,20 +62,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   errorText: {
     fontSize: 13,
-    color: '#d32f2f',
-    backgroundColor: '#fde8e8',
-    padding: 8,
-    margin: 12,
-    borderRadius: 4,
+    color: '#ef4444',
+    backgroundColor: '#fee2e2',
+    padding: 10,
+    margin: 16,
+    borderRadius: 12,
     textAlign: 'center',
+    fontWeight: '500',
   },
 });

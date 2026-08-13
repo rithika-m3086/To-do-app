@@ -25,7 +25,7 @@ export const InputField: React.FC<InputFieldProps> = ({
   multiline = false,
   numberOfLines = 1,
 }) => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
     <View style={styles.container}>
@@ -34,7 +34,7 @@ export const InputField: React.FC<InputFieldProps> = ({
         style={[
           styles.input,
           {
-            borderColor: colors.border,
+            borderColor: isDark ? colors.border : '#e2e8f0',
             backgroundColor: colors.inputBackground,
             color: colors.text,
           },
@@ -58,29 +58,31 @@ export const InputField: React.FC<InputFieldProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    marginBottom: 14,
   },
   label: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 6,
-    padding: 12,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 15,
   },
   multilineInput: {
-    minHeight: 80,
+    minHeight: 90,
     textAlignVertical: 'top',
   },
   inputError: {
-    borderColor: '#d32f2f',
+    borderColor: '#ef4444',
   },
   errorText: {
     fontSize: 12,
-    color: '#d32f2f',
+    color: '#ef4444',
     marginTop: 4,
+    fontWeight: '500',
   },
 });

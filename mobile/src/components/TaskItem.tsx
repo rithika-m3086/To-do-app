@@ -9,6 +9,7 @@ interface TaskItemProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onStartFocus?: (task: Task) => void;
+  onToggleSubTask?: (task: Task, subTaskIndex: number) => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -17,6 +18,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onEdit,
   onDelete,
   onStartFocus,
+  onToggleSubTask,
 }) => {
   const { isDark, colors } = useTheme();
   const isCompleted = task.status === 'completed';
@@ -38,24 +40,24 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const completedSubTasks = task.subTasks?.filter((st) => st.completed).length || 0;
   const subTaskPercent = totalSubTasks > 0 ? Math.round((completedSubTasks / totalSubTasks) * 100) : 0;
 
-  // Matching card background colors inspired by UI mockups
+  // Pastel accent card background colors matching reference design
   const getCardBg = () => {
-    if (isDark) return isCompleted ? '#1a1a1a' : '#242424';
-    if (isCompleted) return '#f4f4f5';
+    if (isDark) return isCompleted ? '#1a1a1a' : '#1E1E1E';
+    if (isCompleted) return '#f4f5f9';
     switch (task.priority) {
-      case 'high': return '#fff7ed'; // Soft orange/peach
-      case 'medium': return '#faf5ff'; // Soft purple/lavender
-      default: return '#f0f9ff'; // Soft blue
+      case 'high': return '#FFE8D6'; // Warm orange/peach accent
+      case 'medium': return '#EAE3FF'; // Lavender accent
+      default: return '#ffffff';
     }
   };
 
   const getCategoryColor = () => {
     switch (task.category) {
-      case 'Work': return { bg: '#e0f2fe', text: '#0284c7' };
-      case 'Study': return { bg: '#f3e8ff', text: '#7e22ce' };
-      case 'Personal': return { bg: '#fce7f3', text: '#be185d' };
-      case 'Fitness': return { bg: '#dcfce7', text: '#15803d' };
-      default: return { bg: '#f1f5f9', text: '#475569' };
+      case 'Work': return { bg: '#DBEAFE', text: '#1D4ED8' };
+      case 'Study': return { bg: '#EAE3FF', text: '#5C3BFF' };
+      case 'Personal': return { bg: '#FCE7F3', text: '#BE185D' };
+      case 'Fitness': return { bg: '#DCFCE7', text: '#15803D' };
+      default: return { bg: '#F1F5F9', text: '#475569' };
     }
   };
 
@@ -67,13 +69,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         styles.card,
         {
           backgroundColor: getCardBg(),
-          borderColor: isDark ? '#333333' : 'transparent',
+          borderColor: isDark ? '#2a2a2a' : '#f1f5f9',
         },
       ]}
     >
       <View style={styles.topHeaderRow}>
         <TouchableOpacity
-          style={[styles.checkboxButton, isCompleted && styles.checkboxCompleted, { borderColor: isDark ? '#555' : '#cbd5e1' }]}
+          style={[styles.checkboxButton, isCompleted && styles.checkboxCompleted]}
           onPress={() => onToggleComplete(task)}
         >
           {isCompleted ? <Text style={styles.checkmarkIcon}>✓</Text> : null}
@@ -83,7 +85,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           <Text
             style={[
               styles.title,
-              { color: colors.text },
+              { color: isDark ? colors.text : (task.priority === 'high' ? '#FF6B00' : task.priority === 'medium' ? '#5C3BFF' : '#1e293b') },
               isCompleted && styles.completedText,
             ]}
             numberOfLines={1}
@@ -113,7 +115,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         <Text
           style={[
             styles.description,
-            { color: colors.textSecondary },
+            { color: isDark ? colors.textSecondary : '#475569' },
             isCompleted && styles.completedText,
           ]}
           numberOfLines={2}
@@ -122,29 +124,55 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </Text>
       ) : null}
 
-      {/* Progress Bar for Subtasks */}
+      {/* Sub-Tasks Preview (Item 4: Smaller muted font size directly beneath main task title) */}
       {totalSubTasks > 0 ? (
-        <View style={styles.progressSection}>
-          <View style={styles.progressTextRow}>
-            <Text style={[styles.progressTitle, { color: colors.textSecondary }]}>Progress</Text>
-            <Text style={[styles.progressPercentText, { color: colors.text }]}>{subTaskPercent}%</Text>
+        <View style={styles.subTasksPreviewContainer}>
+          <View style={styles.subTasksList}>
+            {task.subTasks?.map((st, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.subTaskPreviewItem}
+                onPress={() => onToggleSubTask && onToggleSubTask(task, idx)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.subTaskBullet}>{st.completed ? '☑' : '☐'}</Text>
+                <Text
+                  style={[
+                    styles.subTaskPreviewText,
+                    { color: isDark ? colors.textSecondary : '#475569' },
+                    st.completed && styles.subTaskCompletedText,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {st.title}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
-          <View style={[styles.track, { backgroundColor: isDark ? '#3b3b3b' : '#e2e8f0' }]}>
-            <View
-              style={[
-                styles.fill,
-                { width: `${subTaskPercent}%`, backgroundColor: subTaskPercent === 100 ? '#16a34a' : colors.primary },
-              ]}
-            />
+
+          {/* Subtasks Progress Bar */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressTextRow}>
+              <Text style={[styles.progressTitle, { color: isDark ? colors.textSecondary : '#64748b' }]}>Progress</Text>
+              <Text style={[styles.progressPercentText, { color: colors.text }]}>{subTaskPercent}%</Text>
+            </View>
+            <View style={[styles.track, { backgroundColor: isDark ? '#3b3b3b' : 'rgba(0, 0, 0, 0.08)' }]}>
+              <View
+                style={[
+                  styles.fill,
+                  { width: `${subTaskPercent}%`, backgroundColor: subTaskPercent === 100 ? '#16a34a' : colors.primary },
+                ]}
+              />
+            </View>
           </View>
         </View>
       ) : null}
 
       {/* Bottom info row with deadline time pill & quick actions */}
-      <View style={[styles.cardFooter, { borderTopColor: isDark ? '#333333' : '#f1f5f9' }]}>
+      <View style={[styles.cardFooter, { borderTopColor: isDark ? '#2a2a2a' : 'rgba(0, 0, 0, 0.06)' }]}>
         <View style={styles.footerLeft}>
           {task.deadline ? (
-            <View style={[styles.timePill, { backgroundColor: isDark ? '#2a2a2a' : '#ffffff' }]}>
+            <View style={styles.timePill}>
               <Text style={styles.timePillText}>
                 ⏰ {formatTime(task.deadline) || formatDate(task.deadline)}
               </Text>
@@ -178,26 +206,27 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 12,
     borderWidth: 1,
-    elevation: 2,
+    elevation: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
   },
   topHeaderRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   checkboxButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 7,
+    width: 22,
+    height: 22,
+    borderRadius: 8,
     borderWidth: 2,
+    borderColor: '#94a3b8',
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 10,
     marginTop: 2,
   },
   checkboxCompleted: {
@@ -206,7 +235,7 @@ const styles = StyleSheet.create({
   },
   checkmarkIcon: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
   },
   titleGroup: {
@@ -241,16 +270,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   low: {
-    backgroundColor: '#e0f2fe',
-    color: '#0369a1',
+    backgroundColor: '#DBEAFE',
+    color: '#1D4ED8',
   },
   medium: {
-    backgroundColor: '#fef3c7',
-    color: '#b45309',
+    backgroundColor: '#EAE3FF',
+    color: '#5C3BFF',
   },
   high: {
-    backgroundColor: '#fee2e2',
-    color: '#b91c1c',
+    backgroundColor: '#FFE8D6',
+    color: '#FF6B00',
   },
   menuButton: {
     paddingLeft: 8,
@@ -263,16 +292,41 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 10,
-    marginLeft: 36,
+    marginBottom: 8,
+    marginLeft: 32,
   },
   completedText: {
     textDecorationLine: 'line-through',
-    opacity: 0.55,
+    opacity: 0.5,
+  },
+  subTasksPreviewContainer: {
+    marginLeft: 32,
+    marginVertical: 6,
+  },
+  subTasksList: {
+    marginBottom: 6,
+    gap: 3,
+  },
+  subTaskPreviewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  subTaskBullet: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  subTaskPreviewText: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  subTaskCompletedText: {
+    textDecorationLine: 'line-through',
+    opacity: 0.5,
   },
   progressSection: {
-    marginLeft: 36,
-    marginBottom: 10,
+    marginTop: 4,
+    marginBottom: 4,
   },
   progressTextRow: {
     flexDirection: 'row',
@@ -301,22 +355,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    paddingTop: 10,
-    marginTop: 4,
+    paddingTop: 8,
+    marginTop: 6,
   },
   footerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   timePill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
   },
   timePillText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#ec4899',
+    color: '#db2777',
   },
   dateText: {
     fontSize: 11,
@@ -327,17 +382,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   focusBtn: {
-    backgroundColor: '#fffbebf0',
+    backgroundColor: '#FFE8D6',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#f59e0b',
   },
   focusBtnText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#b45309',
+    color: '#FF6B00',
   },
   deleteBtn: {
     padding: 4,

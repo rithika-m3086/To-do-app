@@ -25,14 +25,13 @@ type FilterOption = 'All' | 'Today' | 'Pending' | 'High Priority' | 'Completed';
 
 export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const { tasks, isLoading, error, fetchTasks, toggleComplete, deleteTask } = useTasks();
+  const { tasks, isLoading, error, fetchTasks, toggleComplete, deleteTask, toggleSubTask } = useTasks();
   const { isDark, colors, toggleTheme } = useTheme();
 
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterOption>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate());
 
   const [focusTask, setFocusTask] = useState<Task | null>(null);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
@@ -117,48 +116,27 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
     return user.email.split('@')[0];
   };
 
-  // Generate 7-day strip centered around current date
-  const generateDateStrip = () => {
-    const dates = [];
-    const today = new Date();
-    for (let i = -2; i <= 4; i++) {
-      const d = new Date();
-      d.setDate(today.getDate() + i);
-      dates.push({
-        dayNum: d.getDate(),
-        dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
-        isToday: d.getDate() === today.getDate(),
-      });
-    }
-    return dates;
-  };
-
-  const dateStrip = generateDateStrip();
-
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? colors.background : '#f8fafc' }]} edges={['top', 'left', 'right']}>
-      {/* Top Header */}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
+      {/* Header: Clean username and avatar only (Greeting removed per spec) */}
       <View style={styles.header}>
         <View style={styles.profileRow}>
           <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
             <Text style={styles.avatarText}>{getUserName().charAt(0).toUpperCase()}</Text>
           </View>
-          <View style={styles.greetingGroup}>
-            <Text style={[styles.greetingText, { color: colors.textSecondary }]}>Good morning 👋</Text>
-            <Text style={[styles.userNameText, { color: colors.text }]}>{getUserName()}</Text>
-          </View>
+          <Text style={[styles.userNameText, { color: colors.text }]}>{getUserName()}</Text>
         </View>
 
         <View style={styles.headerActions}>
           <TouchableOpacity
-            style={[styles.actionBadge, { borderColor: colors.border, backgroundColor: colors.card }]}
+            style={[styles.actionBadge, { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card }]}
             onPress={toggleTheme}
           >
             <Text style={styles.actionBadgeText}>{isDark ? '☀️' : '🌙'}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionBadge, { borderColor: colors.border, backgroundColor: colors.card }]}
+            style={[styles.actionBadge, { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card }]}
             onPress={logout}
           >
             <Text style={styles.logoutText}>Logout</Text>
@@ -176,6 +154,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
             onEdit={handleEditTask}
             onDelete={deleteTask}
             onStartFocus={handleStartFocus}
+            onToggleSubTask={toggleSubTask}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -184,7 +163,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
         ListHeaderComponent={
           <View style={styles.dashboardTop}>
             {/* Search Bar */}
-            <View style={[styles.searchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.searchContainer, { backgroundColor: colors.card, borderColor: isDark ? colors.border : '#f1f5f9' }]}>
               <Text style={styles.searchIcon}>🔍</Text>
               <TextInput
                 style={[styles.searchInput, { color: colors.text }]}
@@ -200,61 +179,39 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
               ) : null}
             </View>
 
-            {/* Summary Stat Feature Cards (Inspired by UI mockup) */}
+            {/* Feature Summary Cards (Vibrant Pastel Colors matching spec) */}
             <Text style={[styles.sectionTitle, { color: colors.text }]}>this week</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsScroll}>
-              {/* Lavender Card: In Schedule */}
-              <View style={[styles.featureCard, { backgroundColor: isDark ? '#2e1065' : '#e9d5ff' }]}>
+              {/* Lavender Accent Card: Background #EAE3FF, primary text #5C3BFF */}
+              <View style={[styles.featureCard, { backgroundColor: colors.lavenderCard }]}>
                 <View style={styles.featureCardHeader}>
                   <View style={styles.featureIconBadge}>
                     <Text style={styles.iconSymbol}>⏱️</Text>
                   </View>
                   <View style={styles.fractionBadge}>
-                    <Text style={styles.fractionText}>{completedCount}/{totalCount}</Text>
+                    <Text style={[styles.fractionText, { color: colors.lavenderText }]}>{completedCount}/{totalCount}</Text>
                   </View>
                 </View>
-                <Text style={[styles.featureTitle, { color: isDark ? '#f3e8ff' : '#4c1d95' }]}>In Schedule</Text>
-                <Text style={[styles.featureSubText, { color: isDark ? '#c084fc' : '#6b21a8' }]}>{pendingCount} task</Text>
+                <Text style={[styles.featureTitle, { color: colors.lavenderText }]}>In Schedule</Text>
+                <Text style={[styles.featureSubText, { color: colors.lavenderText }]}>{pendingCount} task</Text>
               </View>
 
-              {/* Coral/Orange Card: High Priorities */}
-              <View style={[styles.featureCard, { backgroundColor: isDark ? '#7c2d12' : '#ffedd5' }]}>
+              {/* Orange/Peach Accent Card: Background #FFE8D6, primary text #FF6B00 */}
+              <View style={[styles.featureCard, { backgroundColor: colors.orangeCard }]}>
                 <View style={styles.featureCardHeader}>
                   <View style={styles.featureIconBadge}>
                     <Text style={styles.iconSymbol}>🔥</Text>
                   </View>
                   <View style={styles.fractionBadge}>
-                    <Text style={styles.fractionText}>{highPriorityCount}/{totalCount}</Text>
+                    <Text style={[styles.fractionText, { color: colors.orangeText }]}>{highPriorityCount}/{totalCount}</Text>
                   </View>
                 </View>
-                <Text style={[styles.featureTitle, { color: isDark ? '#ffedd5' : '#9a3412' }]}>High Priorities</Text>
-                <Text style={[styles.featureSubText, { color: isDark ? '#fdba74' : '#c2410c' }]}>{highPriorityCount} task</Text>
+                <Text style={[styles.featureTitle, { color: colors.orangeText }]}>High Priorities</Text>
+                <Text style={[styles.featureSubText, { color: colors.orangeText }]}>{highPriorityCount} task</Text>
               </View>
             </ScrollView>
 
-            {/* Calendar Date Selector Strip */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateStripScroll}>
-              {dateStrip.map((item) => {
-                const isSelected = selectedDate === item.dayNum;
-                return (
-                  <TouchableOpacity
-                    key={item.dayNum}
-                    style={[
-                      styles.datePill,
-                      { backgroundColor: colors.card, borderColor: colors.border },
-                      isSelected && { backgroundColor: '#0f172a', borderColor: '#0f172a' },
-                    ]}
-                    onPress={() => setSelectedDate(item.dayNum)}
-                  >
-                    <Text style={[styles.dateNum, { color: colors.text }, isSelected && { color: '#ffffff' }]}>
-                      {item.dayNum}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-
-            {/* Status Filter Pills with Count Badges */}
+            {/* Status Filter Pills with Count Badges (Sky Blue #3B82F6 active) */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsScroll}>
               {(['All', 'Today', 'Pending', 'High Priority', 'Completed'] as FilterOption[]).map((filter) => {
                 const count = getFilterCount(filter);
@@ -264,8 +221,8 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                     key={filter}
                     style={[
                       styles.filterPill,
-                      { borderColor: colors.border, backgroundColor: colors.card },
-                      isActive && { backgroundColor: '#0284c7', borderColor: '#0284c7' },
+                      { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card },
+                      isActive && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                     onPress={() => setActiveFilter(filter)}
                   >
@@ -273,7 +230,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                       {filter}
                     </Text>
                     <View style={[styles.countBadge, isActive && { backgroundColor: '#ffffff' }]}>
-                      <Text style={[styles.countBadgeText, isActive && { color: '#0284c7' }]}>{count}</Text>
+                      <Text style={[styles.countBadgeText, isActive && { color: colors.primary }]}>{count}</Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -290,7 +247,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                       key={cat}
                       style={[
                         styles.catPill,
-                        { borderColor: colors.border, backgroundColor: colors.headerBackground },
+                        { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card },
                         isActive && { backgroundColor: '#10b981', borderColor: '#10b981' },
                       ]}
                       onPress={() => setSelectedCategory(cat)}
@@ -329,11 +286,11 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
         }
       />
 
-      {/* Floating Action Button (FAB) */}
+      {/* Floating Action Button (FAB in Sky Blue #3B82F6) */}
       <TouchableOpacity
         style={[styles.fabButton, { backgroundColor: colors.primary }]}
         onPress={handleAddTask}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
@@ -359,18 +316,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
   },
   profileRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
   },
   avatarCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -379,14 +336,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  greetingGroup: {
-    justifyContent: 'center',
-  },
-  greetingText: {
-    fontSize: 12,
-  },
   userNameText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   headerActions: {
@@ -395,16 +346,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   actionBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   actionBadgeText: {
     fontSize: 14,
   },
   logoutText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#ef4444',
   },
@@ -420,8 +371,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: 1,
     borderRadius: 24,
-    height: 46,
+    height: 48,
     elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
   },
   searchIcon: {
     marginRight: 8,
@@ -441,19 +396,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginHorizontal: 16,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   statsScroll: {
     paddingHorizontal: 16,
-    gap: 12,
-    marginBottom: 16,
+    gap: 14,
+    marginBottom: 20,
   },
   featureCard: {
-    width: 155,
-    padding: 16,
+    width: 160,
+    padding: 18,
     borderRadius: 24,
     justifyContent: 'space-between',
-    minHeight: 125,
+    minHeight: 130,
   },
   featureCardHeader: {
     flexDirection: 'row',
@@ -462,10 +417,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   featureIconBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -473,46 +428,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   fractionBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 14,
   },
   fractionText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#333333',
   },
   featureTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 2,
   },
   featureSubText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-  },
-  dateStripScroll: {
-    paddingHorizontal: 16,
-    gap: 8,
-    marginBottom: 14,
-  },
-  datePill: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dateNum: {
-    fontSize: 14,
-    fontWeight: 'bold',
   },
   pillsScroll: {
     paddingHorizontal: 16,
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   filterPill: {
     flexDirection: 'row',
@@ -527,9 +464,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   countBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: '#f1f5f9',
     justifyContent: 'center',
     alignItems: 'center',
@@ -540,17 +477,17 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   catPill: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 6,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 16,
   },
   catText: {
     fontSize: 12,
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 80,
+    paddingBottom: 90,
   },
   centerContainer: {
     padding: 32,
@@ -575,20 +512,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 24,
     right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
   },
   fabIcon: {
     color: '#ffffff',
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '300',
     marginTop: -2,
   },
