@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+const subTaskSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  completed: {
+    type: Boolean,
+    default: false,
+  },
+});
+
 const taskSchema = new mongoose.Schema(
   {
     owner: {
@@ -15,6 +27,11 @@ const taskSchema = new mongoose.Schema(
     description: {
       type: String,
       default: '',
+    },
+    category: {
+      type: String,
+      default: 'Work',
+      trim: true,
     },
     dateTime: {
       type: Date,
@@ -33,6 +50,7 @@ const taskSchema = new mongoose.Schema(
       enum: ['pending', 'completed'],
       default: 'pending',
     },
+    subTasks: [subTaskSchema],
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

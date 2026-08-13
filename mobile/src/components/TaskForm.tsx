@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { InputField } from './InputField';
 import { PrimaryButton } from './PrimaryButton';
-import { Priority, Task, CreateTaskPayload, UpdateTaskPayload } from '../types';
+import { Priority, Task, CreateTaskPayload, UpdateTaskPayload, SubTask } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 interface TaskFormProps {
   initialValues?: Task;
@@ -12,21 +13,31 @@ interface TaskFormProps {
   isEditing?: boolean;
 }
 
+const DEFAULT_CATEGORIES = ['Work', 'Study', 'Personal', 'Fitness'];
+
 export const TaskForm: React.FC<TaskFormProps> = ({
   initialValues,
   onSubmit,
   onCancel,
   isEditing = false,
 }) => {
+  const { colors } = useTheme();
   const [title, setTitle] = useState(initialValues?.title || '');
   const [description, setDescription] = useState(initialValues?.description || '');
+  const [category, setCategory] = useState(initialValues?.category || 'Work');
+  const [customCategory, setCustomCategory] = useState('');
+  const [showCustomCatInput, setShowCustomCatInput] = useState(false);
   const [priority, setPriority] = useState<Priority>(initialValues?.priority || 'medium');
+
   const [dateTime, setDateTime] = useState<Date>(
     initialValues?.dateTime ? new Date(initialValues.dateTime) : new Date()
   );
   const [deadline, setDeadline] = useState<Date | undefined>(
     initialValues?.deadline ? new Date(initialValues.deadline) : undefined
   );
+
+  const [subTasks, setSubTasks] = useState<SubTask[]>(initialValues?.subTasks || []);
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -86,6 +97,30 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     }
   };
 
+  const handleAddSubTask = () => {
+    if (!newSubTaskTitle.trim()) return;
+    setSubTasks([...subTasks, { title: newSubTaskTitle.trim(), completed: false }]);
+    setNewSubTaskTitle('');
+  };
+
+  const handleRemoveSubTask = (index: number) => {
+    setSubTasks(subTasks.filter((_, i) => i !== index));
+  };
+
+  const handleToggleSubTask = (index: number) => {
+    setSubTasks(
+      subTasks.map((st, i) => (i === index ? { ...st, completed: !st.completed } : st))
+    );
+  };
+
+  const handleAddCustomCategory = () => {
+    if (customCategory.trim()) {
+      setCategory(customCategory.trim());
+      setShowCustomCatInput(false);
+      setCustomCategory('');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!title.trim()) {
       setTitleError('Title is required');
@@ -98,9 +133,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       await onSubmit({
         title: title.trim(),
         description: description.trim(),
+        category,
         priority,
         dateTime: dateTime.toISOString(),
         deadline: deadline ? deadline.toISOString() : undefined,
+        subTasks,
       });
     } finally {
       setSubmitting(false);
@@ -141,17 +178,69 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         numberOfLines={3}
       />
 
-      <Text style={styles.sectionLabel}>Priority</Text>
+      {/* Categories */}
+      <Text style={[styles.sectionLabel, { color: colors.text }]}>Category</Text>
+      <View style={styles.categoryRow}>
+        {DEFAULT_CATEGORIES.concat(
+          !DEFAULT_CATEGORIES.includes(category) ? [category] : []
+        ).map((cat) => (
+          <TouchableOpacity
+            key={cat}
+            style={[
+              styles.categoryBadge,
+              { borderColor: colors.border, backgroundColor: colors.card },
+              category === cat && { backgroundColor: colors.primary, borderColor: colors.primary },
+            ]}
+            onPress={() => setCategory(cat)}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                { color: colors.text },
+                category === cat && { color: '#ffffff', fontWeight: 'bold' },
+              ]}
+            >
+              {cat}
+            </Text>
+          </TouchableOpacity>
+        ))}
+
+        <TouchableOpacity
+          style={[styles.categoryBadge, styles.addCategoryBadge, { borderColor: colors.primary }]}
+          onPress={() => setShowCustomCatInput(!showCustomCatInput)}
+        >
+          <Text style={[styles.categoryText, { color: colors.primary, fontWeight: 'bold' }]}>+ Custom</Text>
+        </TouchableOpacity>
+      </View>
+
+      {showCustomCatInput ? (
+        <View style={styles.customCatRow}>
+          <TextInput
+            style={[styles.customCatInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.inputBackground }]}
+            value={customCategory}
+            onChangeText={setCustomCategory}
+            placeholder="New Category name"
+            placeholderTextColor={colors.textSecondary}
+          />
+          <TouchableOpacity style={[styles.addCatBtn, { backgroundColor: colors.primary }]} onPress={handleAddCustomCategory}>
+            <Text style={styles.addCatBtnText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {/* Priority */}
+      <Text style={[styles.sectionLabel, { color: colors.text }]}>Priority</Text>
       <View style={styles.priorityRow}>
         {(['low', 'medium', 'high'] as Priority[]).map((p) => (
           <TouchableOpacity
             key={p}
-            style={[styles.priorityOption, getPrioritySelectedStyle(p)]}
+            style={[styles.priorityOption, { backgroundColor: colors.card, borderColor: colors.border }, getPrioritySelectedStyle(p)]}
             onPress={() => setPriority(p)}
           >
             <Text
               style={[
                 styles.priorityText,
+                { color: colors.textSecondary },
                 priority === p && styles.priorityTextSelected,
               ]}
             >
@@ -161,12 +250,42 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         ))}
       </View>
 
-      <Text style={styles.sectionLabel}>Scheduled Date & Time</Text>
+      {/* Subtasks */}
+      <Text style={[styles.sectionLabel, { color: colors.text }]}>Sub-tasks Checklist</Text>
+      <View style={styles.subTaskInputRow}>
+        <TextInput
+          style={[styles.subTaskInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.inputBackground }]}
+          value={newSubTaskTitle}
+          onChangeText={setNewSubTaskTitle}
+          placeholder="Add sub-task item..."
+          placeholderTextColor={colors.textSecondary}
+        />
+        <TouchableOpacity style={[styles.subTaskAddBtn, { backgroundColor: colors.primary }]} onPress={handleAddSubTask}>
+          <Text style={styles.subTaskAddBtnText}>Add</Text>
+        </TouchableOpacity>
+      </View>
+
+      {subTasks.map((st, index) => (
+        <View key={index} style={[styles.subTaskRow, { borderColor: colors.border, backgroundColor: colors.card }]}>
+          <TouchableOpacity style={styles.subTaskCheck} onPress={() => handleToggleSubTask(index)}>
+            <Text style={[styles.subTaskCheckIcon, { color: colors.text }]}>{st.completed ? '☑' : '☐'}</Text>
+            <Text style={[styles.subTaskTitle, { color: colors.text }, st.completed && styles.subTaskDone]}>
+              {st.title}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleRemoveSubTask(index)}>
+            <Text style={styles.subTaskRemove}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+
+      {/* Dates */}
+      <Text style={[styles.sectionLabel, { color: colors.text }]}>Scheduled Date & Time</Text>
       <TouchableOpacity
-        style={styles.dateSelector}
+        style={[styles.dateSelector, { borderColor: colors.border, backgroundColor: colors.card }]}
         onPress={() => setShowDatePicker(true)}
       >
-        <Text style={styles.dateSelectorText}>{dateTime.toLocaleString()}</Text>
+        <Text style={[styles.dateSelectorText, { color: colors.text }]}>{dateTime.toLocaleString()}</Text>
       </TouchableOpacity>
 
       {showDatePicker && (
@@ -187,20 +306,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         />
       )}
 
-      <Text style={styles.sectionLabel}>Deadline (Due Date)</Text>
+      <Text style={[styles.sectionLabel, { color: colors.text }]}>Deadline (Due Date)</Text>
       <View style={styles.deadlineRow}>
         <TouchableOpacity
-          style={[styles.dateSelector, { flex: 1 }]}
+          style={[styles.dateSelector, { flex: 1, borderColor: colors.border, backgroundColor: colors.card }]}
           onPress={() => setShowDeadlineDatePicker(true)}
         >
-          <Text style={styles.dateSelectorText}>
+          <Text style={[styles.dateSelectorText, { color: colors.text }]}>
             {deadline ? deadline.toLocaleString() : 'Select Deadline'}
           </Text>
         </TouchableOpacity>
 
         {deadline ? (
           <TouchableOpacity
-            style={styles.clearDeadlineButton}
+            style={[styles.clearDeadlineButton, { borderColor: colors.border }]}
             onPress={() => setDeadline(undefined)}
           >
             <Text style={styles.clearDeadlineText}>Clear</Text>
@@ -251,9 +370,48 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333333',
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 8,
+  },
+  categoryBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 16,
+  },
+  addCategoryBadge: {
+    borderStyle: 'dashed',
+  },
+  categoryText: {
+    fontSize: 12,
+  },
+  customCatRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 10,
+  },
+  customCatInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    fontSize: 14,
+  },
+  addCatBtn: {
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    borderRadius: 6,
+  },
+  addCatBtnText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 13,
   },
   priorityRow: {
     flexDirection: 'row',
@@ -264,10 +422,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     borderRadius: 4,
     alignItems: 'center',
-    backgroundColor: '#ffffff',
   },
   prioritySelectedLow: {
     backgroundColor: '#e0f2fe',
@@ -284,22 +440,72 @@ const styles = StyleSheet.create({
   priorityText: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#666666',
   },
   priorityTextSelected: {
     color: '#111111',
   },
+  subTaskInputRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+  },
+  subTaskInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+  },
+  subTaskAddBtn: {
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    borderRadius: 6,
+  },
+  subTaskAddBtnText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  subTaskRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 6,
+    marginBottom: 6,
+  },
+  subTaskCheck: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  subTaskCheckIcon: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  subTaskTitle: {
+    fontSize: 14,
+    flex: 1,
+  },
+  subTaskDone: {
+    textDecorationLine: 'line-through',
+    opacity: 0.6,
+  },
+  subTaskRemove: {
+    fontSize: 16,
+    color: '#d32f2f',
+    paddingHorizontal: 6,
+  },
   dateSelector: {
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     borderRadius: 4,
     padding: 12,
-    backgroundColor: '#ffffff',
     marginBottom: 12,
   },
   dateSelectorText: {
     fontSize: 15,
-    color: '#333333',
   },
   deadlineRow: {
     flexDirection: 'row',
@@ -309,7 +515,6 @@ const styles = StyleSheet.create({
   clearDeadlineButton: {
     padding: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     borderRadius: 4,
     backgroundColor: '#f5f5f5',
     marginBottom: 12,

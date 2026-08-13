@@ -18,7 +18,7 @@ const getTasks = async (req, res) => {
 // @access  Private
 const createTask = async (req, res) => {
   try {
-    const { title, description, dateTime, deadline, priority } = req.body;
+    const { title, description, category, dateTime, deadline, priority, subTasks } = req.body;
 
     if (!title || !title.trim()) {
       return res.status(400).json({ message: 'Title is required' });
@@ -28,10 +28,12 @@ const createTask = async (req, res) => {
       owner: req.userId,
       title: title.trim(),
       description: description ? description.trim() : '',
+      category: category ? category.trim() : 'Work',
       dateTime: dateTime ? new Date(dateTime) : new Date(),
       deadline: deadline ? new Date(deadline) : undefined,
       priority: priority || 'medium',
       status: 'pending',
+      subTasks: Array.isArray(subTasks) ? subTasks : [],
     });
 
     return res.status(201).json(task);
@@ -47,7 +49,7 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
   try {
     const taskId = req.params.id;
-    const { title, description, dateTime, deadline, priority, status } = req.body;
+    const { title, description, category, dateTime, deadline, priority, status, subTasks } = req.body;
 
     const task = await Task.findOne({ _id: taskId, owner: req.userId });
 
@@ -57,10 +59,12 @@ const updateTask = async (req, res) => {
 
     if (title !== undefined) task.title = title.trim();
     if (description !== undefined) task.description = description.trim();
+    if (category !== undefined) task.category = category.trim();
     if (dateTime !== undefined) task.dateTime = new Date(dateTime);
     if (deadline !== undefined) task.deadline = new Date(deadline);
     if (priority !== undefined) task.priority = priority;
     if (status !== undefined) task.status = status;
+    if (subTasks !== undefined && Array.isArray(subTasks)) task.subTasks = subTasks;
 
     const updatedTask = await task.save();
     return res.status(200).json(updatedTask);

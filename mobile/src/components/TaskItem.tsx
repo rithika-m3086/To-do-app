@@ -8,6 +8,7 @@ interface TaskItemProps {
   onToggleComplete: (task: Task) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
+  onStartFocus?: (task: Task) => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -15,6 +16,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onToggleComplete,
   onEdit,
   onDelete,
+  onStartFocus,
 }) => {
   const { isDark, colors } = useTheme();
   const isCompleted = task.status === 'completed';
@@ -24,6 +26,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     const d = new Date(dateStr);
     return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleString();
   };
+
+  // Subtasks progress calculation
+  const totalSubTasks = task.subTasks?.length || 0;
+  const completedSubTasks = task.subTasks?.filter((st) => st.completed).length || 0;
+  const subTaskPercent = totalSubTasks > 0 ? Math.round((completedSubTasks / totalSubTasks) * 100) : 0;
 
   return (
     <View
@@ -37,15 +44,23 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       ]}
     >
       <View style={styles.headerRow}>
-        <Text
-          style={[
-            styles.title,
-            { color: colors.text },
-            isCompleted && styles.completedText,
-          ]}
-        >
-          {task.title}
-        </Text>
+        <View style={styles.titleCategoryGroup}>
+          {task.category ? (
+            <Text style={[styles.categoryBadge, { backgroundColor: colors.headerBackground, color: colors.primary, borderColor: colors.border }]}>
+              {task.category}
+            </Text>
+          ) : null}
+          <Text
+            style={[
+              styles.title,
+              { color: colors.text },
+              isCompleted && styles.completedText,
+            ]}
+          >
+            {task.title}
+          </Text>
+        </View>
+
         <Text style={[styles.priorityBadge, styles[task.priority]]}>
           {task.priority.toUpperCase()}
         </Text>
@@ -63,6 +78,25 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </Text>
       ) : null}
 
+      {/* Subtasks Progress Bar */}
+      {totalSubTasks > 0 ? (
+        <View style={styles.progressContainer}>
+          <View style={styles.progressTextRow}>
+            <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
+              Subtasks: {completedSubTasks}/{totalSubTasks} ({subTaskPercent}%)
+            </Text>
+          </View>
+          <View style={[styles.progressBarTrack, { backgroundColor: colors.border }]}>
+            <View
+              style={[
+                styles.progressBarFill,
+                { width: `${subTaskPercent}%`, backgroundColor: subTaskPercent === 100 ? '#16a34a' : colors.primary },
+              ]}
+            />
+          </View>
+        </View>
+      ) : null}
+
       <View style={styles.datesRow}>
         {task.deadline ? (
           <Text style={[styles.dateText, { color: colors.textSecondary }]}>
@@ -72,6 +106,15 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       </View>
 
       <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
+        {onStartFocus ? (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.focusButton]}
+            onPress={() => onStartFocus(task)}
+          >
+            <Text style={styles.focusButtonText}>⏱️ Focus</Text>
+          </TouchableOpacity>
+        ) : null}
+
         <TouchableOpacity
           style={[
             styles.actionButton,
@@ -122,11 +165,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 6,
   },
+  titleCategoryGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+    gap: 6,
+  },
+  categoryBadge: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
     flex: 1,
-    marginRight: 8,
   },
   description: {
     fontSize: 14,
@@ -156,6 +214,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#fee2e2',
     color: '#b91c1c',
   },
+  progressContainer: {
+    marginBottom: 8,
+  },
+  progressTextRow: {
+    marginBottom: 4,
+  },
+  progressLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  progressBarTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+  },
   datesRow: {
     marginBottom: 8,
   },
@@ -174,6 +250,15 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderWidth: 1,
     borderRadius: 4,
+  },
+  focusButton: {
+    backgroundColor: '#fef3c7',
+    borderColor: '#f59e0b',
+  },
+  focusButtonText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#b45309',
   },
   completeButton: {
     backgroundColor: '#e6f4ea',
