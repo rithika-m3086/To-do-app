@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Task } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 interface TaskItemProps {
   task: Task;
@@ -15,6 +16,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { isDark, colors } = useTheme();
   const isCompleted = task.status === 'completed';
 
   const formatDate = (dateStr?: string) => {
@@ -24,9 +26,24 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   };
 
   return (
-    <View style={[styles.card, isCompleted && styles.completedCard]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+        },
+        isCompleted && (isDark ? styles.completedCardDark : styles.completedCardLight),
+      ]}
+    >
       <View style={styles.headerRow}>
-        <Text style={[styles.title, isCompleted && styles.completedText]}>
+        <Text
+          style={[
+            styles.title,
+            { color: colors.text },
+            isCompleted && styles.completedText,
+          ]}
+        >
           {task.title}
         </Text>
         <Text style={[styles.priorityBadge, styles[task.priority]]}>
@@ -35,36 +52,51 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       </View>
 
       {task.description ? (
-        <Text style={[styles.description, isCompleted && styles.completedText]}>
+        <Text
+          style={[
+            styles.description,
+            { color: colors.textSecondary },
+            isCompleted && styles.completedText,
+          ]}
+        >
           {task.description}
         </Text>
       ) : null}
 
       <View style={styles.datesRow}>
         {task.deadline ? (
-          <Text style={styles.dateText}>Deadline: {formatDate(task.deadline)}</Text>
+          <Text style={[styles.dateText, { color: colors.textSecondary }]}>
+            Deadline: {formatDate(task.deadline)}
+          </Text>
         ) : null}
       </View>
 
-      <View style={styles.actionsRow}>
+      <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
         <TouchableOpacity
-          style={[styles.actionButton, isCompleted ? styles.undoButton : styles.completeButton]}
+          style={[
+            styles.actionButton,
+            { borderColor: colors.border, backgroundColor: colors.card },
+            isCompleted ? styles.undoButton : styles.completeButton,
+          ]}
           onPress={() => onToggleComplete(task)}
         >
-          <Text style={styles.actionButtonText}>
+          <Text style={[styles.actionButtonText, { color: colors.text }]}>
             {isCompleted ? 'Mark Pending' : 'Mark Complete'}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => onEdit(task)}>
-          <Text style={styles.actionButtonText}>Edit</Text>
+        <TouchableOpacity
+          style={[styles.actionButton, { borderColor: colors.border, backgroundColor: colors.card }]}
+          onPress={() => onEdit(task)}
+        >
+          <Text style={[styles.actionButtonText, { color: colors.text }]}>Edit</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() => onDelete(task._id)}
         >
-          <Text style={styles.actionButtonText}>Delete</Text>
+          <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -75,14 +107,14 @@ const styles = StyleSheet.create({
   card: {
     padding: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     borderRadius: 6,
     marginBottom: 10,
-    backgroundColor: '#ffffff',
   },
-  completedCard: {
+  completedCardLight: {
     backgroundColor: '#f9f9f9',
-    borderColor: '#e0e0e0',
+  },
+  completedCardDark: {
+    backgroundColor: '#181818',
   },
   headerRow: {
     flexDirection: 'row',
@@ -93,18 +125,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333333',
     flex: 1,
     marginRight: 8,
   },
   description: {
     fontSize: 14,
-    color: '#666666',
     marginBottom: 8,
   },
   completedText: {
     textDecorationLine: 'line-through',
-    color: '#888888',
+    opacity: 0.6,
   },
   priorityBadge: {
     fontSize: 11,
@@ -131,13 +161,11 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 12,
-    color: '#777777',
   },
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
     paddingTop: 8,
     gap: 6,
   },
@@ -145,17 +173,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     borderRadius: 4,
-    backgroundColor: '#ffffff',
   },
   completeButton: {
     backgroundColor: '#e6f4ea',
-    borderColor: '#a8dab5',
   },
   undoButton: {
     backgroundColor: '#fff3e0',
-    borderColor: '#ffe0b2',
   },
   deleteButton: {
     backgroundColor: '#fce8e6',
@@ -164,6 +188,10 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#333333',
+  },
+  deleteButtonText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#d32f2f',
   },
 });

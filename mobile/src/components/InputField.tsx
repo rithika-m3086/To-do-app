@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, KeyboardTypeOptions } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 interface InputFieldProps {
   label: string;
@@ -24,14 +25,26 @@ export const InputField: React.FC<InputFieldProps> = ({
   multiline = false,
   numberOfLines = 1,
 }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
       <TextInput
-        style={[styles.input, multiline && styles.multilineInput, error ? styles.inputError : null]}
+        style={[
+          styles.input,
+          {
+            borderColor: colors.border,
+            backgroundColor: colors.inputBackground,
+            color: colors.text,
+          },
+          multiline && styles.multilineInput,
+          error ? styles.inputError : null,
+        ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
+        placeholderTextColor={colors.textSecondary}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         multiline={multiline}
@@ -50,17 +63,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333333',
     marginBottom: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 4,
+    borderRadius: 6,
     padding: 12,
-    fontSize: 16,
-    color: '#333333',
-    backgroundColor: '#ffffff',
+    fontSize: 15,
   },
   multilineInput: {
     minHeight: 80,

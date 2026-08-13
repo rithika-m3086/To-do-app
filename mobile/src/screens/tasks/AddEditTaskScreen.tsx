@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainStackParamList, CreateTaskPayload, UpdateTaskPayload } from '../../types';
 import { useTasks } from '../../context/TaskContext';
+import { useTheme } from '../../context/ThemeContext';
 import { TaskForm } from '../../components/TaskForm';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'AddEditTask'>;
@@ -12,6 +14,7 @@ export const AddEditTaskScreen: React.FC<Props> = ({ route, navigation }) => {
   const isEditing = !!existingTask;
 
   const { createTask, updateTask, error, clearTaskError } = useTasks();
+  const { colors } = useTheme();
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (payload: CreateTaskPayload | UpdateTaskPayload) => {
@@ -35,9 +38,9 @@ export const AddEditTaskScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{isEditing ? 'Edit Task' : 'Create New Task'}</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
+      <View style={[styles.header, { backgroundColor: colors.headerBackground, borderBottomColor: colors.border }]}>
+        <Text style={[styles.title, { color: colors.text }]}>{isEditing ? 'Edit Task' : 'Create New Task'}</Text>
       </View>
 
       {formError || error ? (
@@ -50,25 +53,21 @@ export const AddEditTaskScreen: React.FC<Props> = ({ route, navigation }) => {
         onCancel={handleCancel}
         isEditing={isEditing}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   header: {
-    padding: 12,
+    padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#f9f9f9',
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333333',
   },
   errorText: {
     fontSize: 13,
