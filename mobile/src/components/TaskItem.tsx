@@ -24,7 +24,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'No deadline';
     const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleString();
+    return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   // Subtasks progress calculation
@@ -32,39 +32,54 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const completedSubTasks = task.subTasks?.filter((st) => st.completed).length || 0;
   const subTaskPercent = totalSubTasks > 0 ? Math.round((completedSubTasks / totalSubTasks) * 100) : 0;
 
+  const getCardBg = () => {
+    if (isDark) return isCompleted ? '#1a1a1a' : '#242424';
+    if (isCompleted) return '#f4f4f5';
+    switch (task.priority) {
+      case 'high': return '#fff5f5';
+      case 'medium': return '#fffbeb';
+      default: return '#f0f9ff';
+    }
+  };
+
   return (
     <View
       style={[
         styles.card,
         {
-          backgroundColor: colors.card,
+          backgroundColor: getCardBg(),
           borderColor: colors.border,
         },
-        isCompleted && (isDark ? styles.completedCardDark : styles.completedCardLight),
       ]}
     >
-      <View style={styles.headerRow}>
-        <View style={styles.titleCategoryGroup}>
+      <View style={styles.topMetaRow}>
+        <View style={styles.badgesGroup}>
           {task.category ? (
-            <Text style={[styles.categoryBadge, { backgroundColor: colors.headerBackground, color: colors.primary, borderColor: colors.border }]}>
-              {task.category}
+            <Text style={[styles.categoryBadge, { backgroundColor: isDark ? '#333333' : '#ffffff', color: colors.primary }]}>
+              📁 {task.category}
             </Text>
           ) : null}
-          <Text
-            style={[
-              styles.title,
-              { color: colors.text },
-              isCompleted && styles.completedText,
-            ]}
-          >
-            {task.title}
+          <Text style={[styles.priorityBadge, styles[task.priority]]}>
+            {task.priority.toUpperCase()}
           </Text>
         </View>
 
-        <Text style={[styles.priorityBadge, styles[task.priority]]}>
-          {task.priority.toUpperCase()}
-        </Text>
+        {task.deadline ? (
+          <Text style={[styles.dateBadge, { color: colors.textSecondary }]}>
+            📅 {formatDate(task.deadline)}
+          </Text>
+        ) : null}
       </View>
+
+      <Text
+        style={[
+          styles.title,
+          { color: colors.text },
+          isCompleted && styles.completedText,
+        ]}
+      >
+        {task.title}
+      </Text>
 
       {task.description ? (
         <Text
@@ -73,6 +88,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             { color: colors.textSecondary },
             isCompleted && styles.completedText,
           ]}
+          numberOfLines={2}
         >
           {task.description}
         </Text>
@@ -83,10 +99,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         <View style={styles.progressContainer}>
           <View style={styles.progressTextRow}>
             <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
-              Subtasks: {completedSubTasks}/{totalSubTasks} ({subTaskPercent}%)
+              Subtasks ({completedSubTasks}/{totalSubTasks})
             </Text>
+            <Text style={[styles.progressPercent, { color: colors.text }]}>{subTaskPercent}%</Text>
           </View>
-          <View style={[styles.progressBarTrack, { backgroundColor: colors.border }]}>
+          <View style={[styles.progressBarTrack, { backgroundColor: isDark ? '#3a3a3a' : '#e4e4e7' }]}>
             <View
               style={[
                 styles.progressBarFill,
@@ -97,15 +114,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </View>
       ) : null}
 
-      <View style={styles.datesRow}>
-        {task.deadline ? (
-          <Text style={[styles.dateText, { color: colors.textSecondary }]}>
-            Deadline: {formatDate(task.deadline)}
-          </Text>
-        ) : null}
-      </View>
-
-      <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
+      <View style={[styles.actionsRow, { borderTopColor: isDark ? '#3a3a3a' : '#e4e4e7' }]}>
         {onStartFocus ? (
           <TouchableOpacity
             style={[styles.actionButton, styles.focusButton]}
@@ -118,18 +127,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         <TouchableOpacity
           style={[
             styles.actionButton,
-            { borderColor: colors.border, backgroundColor: colors.card },
             isCompleted ? styles.undoButton : styles.completeButton,
           ]}
           onPress={() => onToggleComplete(task)}
         >
-          <Text style={[styles.actionButtonText, { color: colors.text }]}>
-            {isCompleted ? 'Mark Pending' : 'Mark Complete'}
+          <Text style={[styles.actionButtonText, isCompleted ? styles.undoText : styles.completeText]}>
+            {isCompleted ? '↩ Pending' : '✓ Complete'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, { borderColor: colors.border, backgroundColor: colors.card }]}
+          style={[styles.actionButton, styles.secondaryAction, { backgroundColor: isDark ? '#333' : '#ffffff', borderColor: colors.border }]}
           onPress={() => onEdit(task)}
         >
           <Text style={[styles.actionButtonText, { color: colors.text }]}>Edit</Text>
@@ -148,58 +156,41 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    padding: 12,
+    padding: 14,
     borderWidth: 1,
-    borderRadius: 6,
-    marginBottom: 10,
+    borderRadius: 16,
+    marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
-  completedCardLight: {
-    backgroundColor: '#f9f9f9',
-  },
-  completedCardDark: {
-    backgroundColor: '#181818',
-  },
-  headerRow: {
+  topMetaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  titleCategoryGroup: {
+  badgesGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    marginRight: 8,
     gap: 6,
   },
   categoryBadge: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  description: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    opacity: 0.6,
-  },
-  priorityBadge: {
     fontSize: 11,
     fontWeight: 'bold',
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 3,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  priorityBadge: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   low: {
@@ -214,15 +205,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#fee2e2',
     color: '#b91c1c',
   },
+  dateBadge: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  description: {
+    fontSize: 13,
+    marginBottom: 10,
+    lineHeight: 18,
+  },
+  completedText: {
+    textDecorationLine: 'line-through',
+    opacity: 0.5,
+  },
   progressContainer: {
-    marginBottom: 8,
+    marginVertical: 6,
   },
   progressTextRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 4,
   },
   progressLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
+  },
+  progressPercent: {
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   progressBarTrack: {
     height: 6,
@@ -232,27 +247,22 @@ const styles = StyleSheet.create({
   progressBarFill: {
     height: '100%',
   },
-  datesRow: {
-    marginBottom: 8,
-  },
-  dateText: {
-    fontSize: 12,
-  },
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     borderTopWidth: 1,
-    paddingTop: 8,
+    paddingTop: 10,
+    marginTop: 6,
     gap: 6,
   },
   actionButton: {
     paddingHorizontal: 10,
     paddingVertical: 6,
+    borderRadius: 8,
     borderWidth: 1,
-    borderRadius: 4,
   },
   focusButton: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#fffbebf0',
     borderColor: '#f59e0b',
   },
   focusButtonText: {
@@ -261,14 +271,25 @@ const styles = StyleSheet.create({
     color: '#b45309',
   },
   completeButton: {
-    backgroundColor: '#e6f4ea',
+    backgroundColor: '#dcfce7',
+    borderColor: '#86efac',
+  },
+  completeText: {
+    color: '#15803d',
   },
   undoButton: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: '#ffedd5',
+    borderColor: '#fdba74',
+  },
+  undoText: {
+    color: '#c2410c',
+  },
+  secondaryAction: {
+    borderColor: '#e4e4e7',
   },
   deleteButton: {
-    backgroundColor: '#fce8e6',
-    borderColor: '#fad1d1',
+    backgroundColor: '#fee2e2',
+    borderColor: '#fca5a5',
   },
   actionButtonText: {
     fontSize: 12,
@@ -277,6 +298,6 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#d32f2f',
+    color: '#b91c1c',
   },
 });
