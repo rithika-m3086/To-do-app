@@ -32,6 +32,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
   const [activeFilter, setActiveFilter] = useState<FilterOption>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate());
 
   const [focusTask, setFocusTask] = useState<Task | null>(null);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
@@ -69,7 +70,6 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
 
   // Filter & Search tasks
   const filteredTasks = tasks.filter((t) => {
-    // Search query filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       const matchTitle = t.title.toLowerCase().includes(q);
@@ -77,7 +77,6 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
       if (!matchTitle && !matchDesc) return false;
     }
 
-    // Status / Smart filter
     if (activeFilter === 'Pending' && t.status !== 'pending') return false;
     if (activeFilter === 'Completed' && t.status !== 'completed') return false;
     if (activeFilter === 'High Priority' && t.priority !== 'high') return false;
@@ -87,7 +86,6 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
       if (todayStr !== taskDateStr) return false;
     }
 
-    // Category filter
     if (selectedCategory !== 'All' && t.category !== selectedCategory) {
       return false;
     }
@@ -119,10 +117,28 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
     return user.email.split('@')[0];
   };
 
+  // Generate 7-day strip centered around current date
+  const generateDateStrip = () => {
+    const dates = [];
+    const today = new Date();
+    for (let i = -2; i <= 4; i++) {
+      const d = new Date();
+      d.setDate(today.getDate() + i);
+      dates.push({
+        dayNum: d.getDate(),
+        dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        isToday: d.getDate() === today.getDate(),
+      });
+    }
+    return dates;
+  };
+
+  const dateStrip = generateDateStrip();
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
-      {/* Redesigned Dashboard Header */}
-      <View style={[styles.header, { backgroundColor: colors.headerBackground, borderBottomColor: colors.border }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? colors.background : '#f8fafc' }]} edges={['top', 'left', 'right']}>
+      {/* Top Header */}
+      <View style={styles.header}>
         <View style={styles.profileRow}>
           <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
             <Text style={styles.avatarText}>{getUserName().charAt(0).toUpperCase()}</Text>
@@ -138,9 +154,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
             style={[styles.actionBadge, { borderColor: colors.border, backgroundColor: colors.card }]}
             onPress={toggleTheme}
           >
-            <Text style={[styles.actionBadgeText, { color: colors.text }]}>
-              {isDark ? '☀️' : '🌙'}
-            </Text>
+            <Text style={styles.actionBadgeText}>{isDark ? '☀️' : '🌙'}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -170,11 +184,11 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
         ListHeaderComponent={
           <View style={styles.dashboardTop}>
             {/* Search Bar */}
-            <View style={[styles.searchContainer, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
+            <View style={[styles.searchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={styles.searchIcon}>🔍</Text>
               <TextInput
                 style={[styles.searchInput, { color: colors.text }]}
-                placeholder="Search tasks..."
+                placeholder="Search a task....."
                 placeholderTextColor={colors.textSecondary}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -186,29 +200,61 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
               ) : null}
             </View>
 
-            {/* Summary Stat Cards */}
+            {/* Summary Stat Feature Cards (Inspired by UI mockup) */}
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>this week</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsScroll}>
-              <View style={[styles.statCard, { backgroundColor: isDark ? '#1e293b' : '#eff6ff', borderColor: colors.border }]}>
-                <Text style={styles.statIcon}>📋</Text>
-                <Text style={[styles.statValue, { color: colors.text }]}>{totalCount}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Tasks</Text>
+              {/* Lavender Card: In Schedule */}
+              <View style={[styles.featureCard, { backgroundColor: isDark ? '#2e1065' : '#e9d5ff' }]}>
+                <View style={styles.featureCardHeader}>
+                  <View style={styles.featureIconBadge}>
+                    <Text style={styles.iconSymbol}>⏱️</Text>
+                  </View>
+                  <View style={styles.fractionBadge}>
+                    <Text style={styles.fractionText}>{completedCount}/{totalCount}</Text>
+                  </View>
+                </View>
+                <Text style={[styles.featureTitle, { color: isDark ? '#f3e8ff' : '#4c1d95' }]}>In Schedule</Text>
+                <Text style={[styles.featureSubText, { color: isDark ? '#c084fc' : '#6b21a8' }]}>{pendingCount} task</Text>
               </View>
 
-              <View style={[styles.statCard, { backgroundColor: isDark ? '#3b0764' : '#fef2f2', borderColor: colors.border }]}>
-                <Text style={styles.statIcon}>🔥</Text>
-                <Text style={[styles.statValue, { color: '#ef4444' }]}>{highPriorityCount}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>High Priorities</Text>
-              </View>
-
-              <View style={[styles.statCard, { backgroundColor: isDark ? '#064e3b' : '#f0fdf4', borderColor: colors.border }]}>
-                <Text style={styles.statIcon}>✅</Text>
-                <Text style={[styles.statValue, { color: '#16a34a' }]}>{completedCount}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Completed</Text>
+              {/* Coral/Orange Card: High Priorities */}
+              <View style={[styles.featureCard, { backgroundColor: isDark ? '#7c2d12' : '#ffedd5' }]}>
+                <View style={styles.featureCardHeader}>
+                  <View style={styles.featureIconBadge}>
+                    <Text style={styles.iconSymbol}>🔥</Text>
+                  </View>
+                  <View style={styles.fractionBadge}>
+                    <Text style={styles.fractionText}>{highPriorityCount}/{totalCount}</Text>
+                  </View>
+                </View>
+                <Text style={[styles.featureTitle, { color: isDark ? '#ffedd5' : '#9a3412' }]}>High Priorities</Text>
+                <Text style={[styles.featureSubText, { color: isDark ? '#fdba74' : '#c2410c' }]}>{highPriorityCount} task</Text>
               </View>
             </ScrollView>
 
-            {/* Status Filter Pills */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Filters</Text>
+            {/* Calendar Date Selector Strip */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateStripScroll}>
+              {dateStrip.map((item) => {
+                const isSelected = selectedDate === item.dayNum;
+                return (
+                  <TouchableOpacity
+                    key={item.dayNum}
+                    style={[
+                      styles.datePill,
+                      { backgroundColor: colors.card, borderColor: colors.border },
+                      isSelected && { backgroundColor: '#0f172a', borderColor: '#0f172a' },
+                    ]}
+                    onPress={() => setSelectedDate(item.dayNum)}
+                  >
+                    <Text style={[styles.dateNum, { color: colors.text }, isSelected && { color: '#ffffff' }]}>
+                      {item.dayNum}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {/* Status Filter Pills with Count Badges */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsScroll}>
               {(['All', 'Today', 'Pending', 'High Priority', 'Completed'] as FilterOption[]).map((filter) => {
                 const count = getFilterCount(filter);
@@ -219,19 +265,16 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
                     style={[
                       styles.filterPill,
                       { borderColor: colors.border, backgroundColor: colors.card },
-                      isActive && { backgroundColor: colors.primary, borderColor: colors.primary },
+                      isActive && { backgroundColor: '#0284c7', borderColor: '#0284c7' },
                     ]}
                     onPress={() => setActiveFilter(filter)}
                   >
-                    <Text
-                      style={[
-                        styles.filterText,
-                        { color: colors.text },
-                        isActive && { color: '#ffffff', fontWeight: 'bold' },
-                      ]}
-                    >
-                      {filter} {count > 0 ? `(${count})` : ''}
+                    <Text style={[styles.filterLabelText, { color: colors.text }, isActive && { color: '#ffffff', fontWeight: 'bold' }]}>
+                      {filter}
                     </Text>
+                    <View style={[styles.countBadge, isActive && { backgroundColor: '#ffffff' }]}>
+                      <Text style={[styles.countBadgeText, isActive && { color: '#0284c7' }]}>{count}</Text>
+                    </View>
                   </TouchableOpacity>
                 );
               })}
@@ -267,6 +310,7 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
               </ScrollView>
             ) : null}
 
+            <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 12 }]}>Today's task</Text>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
         }
@@ -317,7 +361,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
   },
   profileRow: {
     flexDirection: 'row',
@@ -355,7 +398,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   actionBadgeText: {
     fontSize: 14,
@@ -366,18 +409,19 @@ const styles = StyleSheet.create({
     color: '#ef4444',
   },
   dashboardTop: {
-    paddingBottom: 8,
+    paddingBottom: 4,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 12,
-    paddingHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 16,
+    paddingHorizontal: 16,
     borderWidth: 1,
-    borderRadius: 12,
-    height: 44,
+    borderRadius: 24,
+    height: 46,
+    elevation: 1,
   },
   searchIcon: {
     marginRight: 8,
@@ -393,58 +437,116 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 4,
   },
-  statsScroll: {
-    paddingHorizontal: 16,
-    gap: 10,
-    marginBottom: 14,
-  },
-  statCard: {
-    width: 120,
-    padding: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: 'flex-start',
-  },
-  statIcon: {
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 11,
-    marginTop: 2,
-  },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: 'bold',
     marginHorizontal: 16,
-    marginBottom: 6,
+    marginBottom: 10,
+  },
+  statsScroll: {
+    paddingHorizontal: 16,
+    gap: 12,
+    marginBottom: 16,
+  },
+  featureCard: {
+    width: 155,
+    padding: 16,
+    borderRadius: 24,
+    justifyContent: 'space-between',
+    minHeight: 125,
+  },
+  featureCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  featureIconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconSymbol: {
+    fontSize: 16,
+  },
+  fractionBadge: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  fractionText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  featureTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  featureSubText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  dateStripScroll: {
+    paddingHorizontal: 16,
+    gap: 8,
+    marginBottom: 14,
+  },
+  datePill: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateNum: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   pillsScroll: {
     paddingHorizontal: 16,
-    gap: 6,
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 10,
   },
   filterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: 20,
+    gap: 8,
+  },
+  filterLabelText: {
+    fontSize: 13,
+  },
+  countBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#f1f5f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  countBadgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#475569',
+  },
+  catPill: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    borderRadius: 16,
-  },
-  filterText: {
-    fontSize: 12,
-  },
-  catPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   catText: {
-    fontSize: 11,
+    fontSize: 12,
   },
   listContent: {
     paddingHorizontal: 16,
