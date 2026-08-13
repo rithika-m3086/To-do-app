@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { InputField } from '../../components/InputField';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { AppBackground } from '../../components/AppBackground';
@@ -12,6 +13,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, error, clearError } = useAuth();
+  const { isDark, colors } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -52,8 +54,17 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <AppBackground>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <View style={styles.card}>
-          <Text style={styles.title}>Login</Text>
+        <View
+          style={[
+            styles.card,
+            isDark && {
+              backgroundColor: '#121212', // Dark mode card: slightly lighter dark gray matching color palette
+              borderWidth: 1,
+              borderColor: '#27272A',
+            },
+          ]}
+        >
+          <Text style={[styles.title, isDark && { color: '#F8FAFC' }]}>Login</Text>
 
           {error ? <Text style={styles.serverError}>{error}</Text> : null}
 
@@ -88,7 +99,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
+            <Text style={[styles.footerText, isDark && { color: '#A1A1AA' }]}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text style={styles.linkText}>Register</Text>
             </TouchableOpacity>
@@ -108,7 +119,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 24,
     borderRadius: 24,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff', // Light mode card background
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },

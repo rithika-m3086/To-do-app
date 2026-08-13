@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { InputField } from '../../components/InputField';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { AppBackground } from '../../components/AppBackground';
@@ -12,6 +13,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const { register, error, clearError } = useAuth();
+  const { isDark, colors } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -52,8 +54,17 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <AppBackground>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <View style={styles.card}>
-          <Text style={styles.title}>Register</Text>
+        <View
+          style={[
+            styles.card,
+            isDark && {
+              backgroundColor: '#121212', // Dark mode card: slightly lighter dark gray matching color palette
+              borderWidth: 1,
+              borderColor: '#27272A',
+            },
+          ]}
+        >
+          <Text style={[styles.title, isDark && { color: '#F8FAFC' }]}>Register</Text>
 
           {error ? <Text style={styles.serverError}>{error}</Text> : null}
 
@@ -88,7 +99,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Already have an account? </Text>
+            <Text style={[styles.footerText, isDark && { color: '#A1A1AA' }]}>Already have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.linkText}>Sign In</Text>
             </TouchableOpacity>
@@ -108,12 +119,12 @@ const styles = StyleSheet.create({
   card: {
     padding: 24,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    elevation: 4,
+    backgroundColor: '#ffffff', // Light mode card background
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
   },
   title: {
     fontSize: 26,
@@ -124,8 +135,8 @@ const styles = StyleSheet.create({
   },
   serverError: {
     fontSize: 13,
-    color: '#ef4444',
-    backgroundColor: '#fee2e2',
+    color: '#EF4444',
+    backgroundColor: '#FEE2E2',
     padding: 12,
     borderRadius: 12,
     marginBottom: 16,
@@ -144,6 +155,6 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#0284C7',
+    color: '#0077B6',
   },
 });
