@@ -6,6 +6,7 @@ import { MainStackParamList, CreateTaskPayload, UpdateTaskPayload } from '../../
 import { useTasks } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
 import { TaskForm } from '../../components/TaskForm';
+import { AppBackground } from '../../components/AppBackground';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'AddEditTask'>;
 
@@ -38,22 +39,24 @@ export const AddEditTaskScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
-      <View style={[styles.header, { backgroundColor: colors.headerBackground, borderBottomColor: isDark ? colors.border : '#e2e8f0' }]}>
-        <Text style={[styles.title, { color: colors.text }]}>{isEditing ? 'Edit Task' : 'Create New Task'}</Text>
-      </View>
+    <AppBackground>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+        <View style={[styles.header, { backgroundColor: isDark ? colors.headerBackground : 'rgba(255, 255, 255, 0.85)', borderBottomColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)' }]}>
+          <Text style={[styles.title, { color: colors.text }]}>{isEditing ? 'Edit Task' : 'Create New Task'}</Text>
+        </View>
 
-      {formError || error ? (
-        <Text style={styles.errorText}>{formError || error}</Text>
-      ) : null}
+        {formError || error ? (
+          <Text style={styles.errorText}>{formError || error}</Text>
+        ) : null}
 
-      <TaskForm
-        initialValues={existingTask}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isEditing={isEditing}
-      />
-    </SafeAreaView>
+        <TaskForm
+          initialValues={existingTask}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          isEditing={isEditing}
+        />
+      </SafeAreaView>
+    </AppBackground>
   );
 };
 
@@ -72,8 +75,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
-    color: '#ef4444',
-    backgroundColor: '#fee2e2',
+    color: '#EF4444',
+    backgroundColor: '#FEE2E2',
     padding: 10,
     margin: 16,
     borderRadius: 12,

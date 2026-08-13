@@ -40,20 +40,35 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const completedSubTasks = task.subTasks?.filter((st) => st.completed).length || 0;
   const subTaskPercent = totalSubTasks > 0 ? Math.round((completedSubTasks / totalSubTasks) * 100) : 0;
 
-  // Pastel accent card background colors matching reference design
-  const getCardBg = () => {
-    if (isDark) return isCompleted ? '#1a1a1a' : '#1E1E1E';
-    if (isCompleted) return '#f4f5f9';
+  // Priority color styling based on extracted mesh gradient palette
+  const getPriorityStyle = () => {
     switch (task.priority) {
-      case 'high': return '#FFE8D6'; // Warm orange/peach accent
-      case 'medium': return '#EAE3FF'; // Lavender accent
-      default: return '#ffffff';
+      case 'high':
+        return {
+          bg: colors.highPriorityBg,
+          tagBg: colors.highPriorityTag,
+          text: isDark ? '#FF6B35' : '#C2410C',
+        };
+      case 'medium':
+        return {
+          bg: colors.mediumPriorityBg,
+          tagBg: colors.mediumPriorityTag,
+          text: isDark ? '#E6399B' : '#BE185D',
+        };
+      default:
+        return {
+          bg: colors.lowPriorityBg,
+          tagBg: colors.lowPriorityTag,
+          text: isDark ? '#38BDF8' : '#1D4ED8',
+        };
     }
   };
 
+  const priorityStyle = getPriorityStyle();
+
   const getCategoryColor = () => {
     switch (task.category) {
-      case 'Work': return { bg: '#DBEAFE', text: '#1D4ED8' };
+      case 'Work': return { bg: '#E0F2FE', text: '#0284C7' };
       case 'Study': return { bg: '#EAE3FF', text: '#5C3BFF' };
       case 'Personal': return { bg: '#FCE7F3', text: '#BE185D' };
       case 'Fitness': return { bg: '#DCFCE7', text: '#15803D' };
@@ -68,8 +83,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       style={[
         styles.card,
         {
-          backgroundColor: getCardBg(),
-          borderColor: isDark ? '#2a2a2a' : '#f1f5f9',
+          backgroundColor: isDark ? colors.card : colors.cardGlass,
+          borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)',
         },
       ]}
     >
@@ -85,7 +100,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           <Text
             style={[
               styles.title,
-              { color: isDark ? colors.text : (task.priority === 'high' ? '#FF6B00' : task.priority === 'medium' ? '#5C3BFF' : '#1e293b') },
+              { color: isDark ? colors.text : '#0F172A' },
               isCompleted && styles.completedText,
             ]}
             numberOfLines={1}
@@ -100,7 +115,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               </View>
             ) : null}
 
-            <View style={[styles.priorityBadge, styles[task.priority]]}>
+            <View style={[styles.priorityBadge, { backgroundColor: priorityStyle.tagBg }]}>
               <Text style={styles.priorityText}>{task.priority.toUpperCase()}</Text>
             </View>
           </View>
@@ -124,7 +139,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </Text>
       ) : null}
 
-      {/* Sub-Tasks Preview (Item 4: Smaller muted font size directly beneath main task title) */}
+      {/* Sub-Tasks Preview */}
       {totalSubTasks > 0 ? (
         <View style={styles.subTasksPreviewContainer}>
           <View style={styles.subTasksList}>
@@ -160,7 +175,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               <View
                 style={[
                   styles.fill,
-                  { width: `${subTaskPercent}%`, backgroundColor: subTaskPercent === 100 ? '#16a34a' : colors.primary },
+                  { width: `${subTaskPercent}%`, backgroundColor: subTaskPercent === 100 ? '#16a34a' : priorityStyle.tagBg },
                 ]}
               />
             </View>
@@ -206,11 +221,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 12,
     borderWidth: 1,
-    elevation: 1,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
   },
   topHeaderRow: {
     flexDirection: 'row',
@@ -268,18 +283,7 @@ const styles = StyleSheet.create({
   priorityText: {
     fontSize: 9,
     fontWeight: 'bold',
-  },
-  low: {
-    backgroundColor: '#DBEAFE',
-    color: '#1D4ED8',
-  },
-  medium: {
-    backgroundColor: '#EAE3FF',
-    color: '#5C3BFF',
-  },
-  high: {
-    backgroundColor: '#FFE8D6',
-    color: '#FF6B00',
+    color: '#ffffff',
   },
   menuButton: {
     paddingLeft: 8,
@@ -363,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timePill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
@@ -371,7 +375,7 @@ const styles = StyleSheet.create({
   timePillText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#db2777',
+    color: '#E6399B',
   },
   dateText: {
     fontSize: 11,
@@ -382,7 +386,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   focusBtn: {
-    backgroundColor: '#FFE8D6',
+    backgroundColor: '#FFEAD9',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -390,7 +394,7 @@ const styles = StyleSheet.create({
   focusBtnText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#FF6B00',
+    color: '#FF6B35',
   },
   deleteBtn: {
     padding: 4,

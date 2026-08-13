@@ -6,6 +6,7 @@ export type ThemeMode = 'light' | 'dark';
 export interface ThemeColors {
   background: string;
   card: string;
+  cardGlass: string;
   text: string;
   textSecondary: string;
   border: string;
@@ -13,7 +14,14 @@ export interface ThemeColors {
   inputBackground: string;
   primary: string;
   danger: string;
-  // Bubbly pastel card accents
+  // Priority Fills and Badges
+  highPriorityBg: string;
+  highPriorityTag: string;
+  mediumPriorityBg: string;
+  mediumPriorityTag: string;
+  lowPriorityBg: string;
+  lowPriorityTag: string;
+  // Bubbly pastel feature cards
   lavenderCard: string;
   lavenderText: string;
   orangeCard: string;
@@ -21,35 +29,51 @@ export interface ThemeColors {
 }
 
 export const lightColors: ThemeColors = {
-  background: '#F8F9FB',
+  background: 'transparent',
   card: '#ffffff',
-  text: '#1e293b',
-  textSecondary: '#64748b',
-  border: '#f1f5f9',
-  headerBackground: '#F8F9FB',
-  inputBackground: '#ffffff',
-  primary: '#3B82F6',
-  danger: '#ef4444',
-  lavenderCard: '#EAE3FF',
+  cardGlass: 'rgba(255, 255, 255, 0.88)',
+  text: '#0F172A', // Deep slate navy
+  textSecondary: '#475569',
+  border: 'rgba(255, 255, 255, 0.5)',
+  headerBackground: 'rgba(255, 255, 255, 0.75)',
+  inputBackground: 'rgba(255, 255, 255, 0.9)',
+  primary: '#0284C7', // Cyan / Ocean Blue
+  danger: '#EF4444',
+  // Priority Mapping
+  highPriorityBg: '#FFEAD9',
+  highPriorityTag: '#FF6B35',
+  mediumPriorityBg: '#FCE4EC',
+  mediumPriorityTag: '#E6399B',
+  lowPriorityBg: '#E0F2FE',
+  lowPriorityTag: '#0284C7',
+  // Feature Cards
+  lavenderCard: 'rgba(234, 227, 255, 0.92)',
   lavenderText: '#5C3BFF',
-  orangeCard: '#FFE8D6',
+  orangeCard: 'rgba(255, 232, 214, 0.92)',
   orangeText: '#FF6B00',
 };
 
 export const darkColors: ThemeColors = {
   background: '#121212',
   card: '#1E1E1E',
-  text: '#f8fafc',
-  textSecondary: '#94a3b8',
-  border: '#2a2a2a',
+  cardGlass: 'rgba(30, 30, 30, 0.92)',
+  text: '#F8FAFC',
+  textSecondary: '#94A3B8',
+  border: '#2A2A2A',
   headerBackground: '#181818',
-  inputBackground: '#2a2a2a',
+  inputBackground: '#2A2A2A',
   primary: '#3B82F6',
-  danger: '#ef4444',
-  lavenderCard: '#2e1065',
-  lavenderText: '#c084fc',
-  orangeCard: '#7c2d12',
-  orangeText: '#fdba74',
+  danger: '#EF4444',
+  highPriorityBg: '#7C2D12',
+  highPriorityTag: '#FF6B35',
+  mediumPriorityBg: '#831843',
+  mediumPriorityTag: '#E6399B',
+  lowPriorityBg: '#075985',
+  lowPriorityTag: '#38BDF8',
+  lavenderCard: '#2E1065',
+  lavenderText: '#C084FC',
+  orangeCard: '#7C2D12',
+  orangeText: '#FDBA74',
 };
 
 interface ThemeContextType {
@@ -64,7 +88,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = 'user_theme_preference';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // Always default to Light Mode on launch
+  // Always default to Light Mode on startup
   const [theme, setTheme] = useState<ThemeMode>('light');
 
   useEffect(() => {

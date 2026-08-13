@@ -5,6 +5,7 @@ import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { InputField } from '../../components/InputField';
 import { PrimaryButton } from '../../components/PrimaryButton';
+import { AppBackground } from '../../components/AppBackground';
 import { isValidEmail, isValidPassword } from '../../utils/validators';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
@@ -49,50 +50,52 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <View style={styles.card}>
-        <Text style={styles.title}>Register</Text>
+    <AppBackground>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.card}>
+          <Text style={styles.title}>Register</Text>
 
-        {error ? <Text style={styles.serverError}>{error}</Text> : null}
+          {error ? <Text style={styles.serverError}>{error}</Text> : null}
 
-        <InputField
-          label="Email"
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-            if (emailError) setEmailError(null);
-          }}
-          placeholder="user@example.com"
-          keyboardType="email-address"
-          error={emailError}
-        />
+          <InputField
+            label="Email"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              if (emailError) setEmailError(null);
+            }}
+            placeholder="user@example.com"
+            keyboardType="email-address"
+            error={emailError}
+          />
 
-        <InputField
-          label="Password (min 6 chars)"
-          value={password}
-          onChangeText={(text) => {
-            setPassword(text);
-            if (passwordError) setPasswordError(null);
-          }}
-          placeholder="••••••••"
-          secureTextEntry
-          error={passwordError}
-        />
+          <InputField
+            label="Password (min 6 chars)"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (passwordError) setPasswordError(null);
+            }}
+            placeholder="••••••••"
+            secureTextEntry
+            error={passwordError}
+          />
 
-        <PrimaryButton
-          title="Create Account"
-          onPress={handleRegister}
-          loading={loading}
-        />
+          <PrimaryButton
+            title="Create Account"
+            onPress={handleRegister}
+            loading={loading}
+          />
 
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.linkText}>Sign In</Text>
-          </TouchableOpacity>
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.linkText}>Sign In</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </AppBackground>
   );
 };
 
@@ -101,22 +104,21 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     justifyContent: 'center',
-    backgroundColor: '#F8F9FB', // Soft off-white light mode background
   },
   card: {
     padding: 24,
     borderRadius: 24,
-    backgroundColor: '#ffffff',
-    elevation: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
   },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#0F172A',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -137,11 +139,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#475569',
   },
   linkText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#3B82F6',
+    color: '#0284C7',
   },
 });

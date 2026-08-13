@@ -16,6 +16,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
 import { TaskItem } from '../../components/TaskItem';
+import { AppBackground } from '../../components/AppBackground';
 import { PomodoroTimerModal } from '../../components/PomodoroTimerModal';
 import { sortTasks } from '../../utils/sortTasks';
 
@@ -117,194 +118,196 @@ export const TaskListScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
-      {/* Header: Clean username and avatar only (Greeting removed per spec) */}
-      <View style={styles.header}>
-        <View style={styles.profileRow}>
-          <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
-            <Text style={styles.avatarText}>{getUserName().charAt(0).toUpperCase()}</Text>
-          </View>
-          <Text style={[styles.userNameText, { color: colors.text }]}>{getUserName()}</Text>
-        </View>
-
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={[styles.actionBadge, { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card }]}
-            onPress={toggleTheme}
-          >
-            <Text style={styles.actionBadgeText}>{isDark ? '☀️' : '🌙'}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionBadge, { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card }]}
-            onPress={logout}
-          >
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <FlatList
-        data={sortedTaskList}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <TaskItem
-            task={item}
-            onToggleComplete={toggleComplete}
-            onEdit={handleEditTask}
-            onDelete={deleteTask}
-            onStartFocus={handleStartFocus}
-            onToggleSubTask={toggleSubTask}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-        ListHeaderComponent={
-          <View style={styles.dashboardTop}>
-            {/* Search Bar */}
-            <View style={[styles.searchContainer, { backgroundColor: colors.card, borderColor: isDark ? colors.border : '#f1f5f9' }]}>
-              <Text style={styles.searchIcon}>🔍</Text>
-              <TextInput
-                style={[styles.searchInput, { color: colors.text }]}
-                placeholder="Search a task....."
-                placeholderTextColor={colors.textSecondary}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery ? (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Text style={[styles.clearSearch, { color: colors.textSecondary }]}>✕</Text>
-                </TouchableOpacity>
-              ) : null}
+    <AppBackground>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+        {/* Header: Clean username and avatar only */}
+        <View style={styles.header}>
+          <View style={styles.profileRow}>
+            <View style={[styles.avatarCircle, { backgroundColor: '#0284C7' }]}>
+              <Text style={styles.avatarText}>{getUserName().charAt(0).toUpperCase()}</Text>
             </View>
+            <Text style={[styles.userNameText, { color: colors.text }]}>{getUserName()}</Text>
+          </View>
 
-            {/* Feature Summary Cards (Vibrant Pastel Colors matching spec) */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>this week</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsScroll}>
-              {/* Lavender Accent Card: Background #EAE3FF, primary text #5C3BFF */}
-              <View style={[styles.featureCard, { backgroundColor: colors.lavenderCard }]}>
-                <View style={styles.featureCardHeader}>
-                  <View style={styles.featureIconBadge}>
-                    <Text style={styles.iconSymbol}>⏱️</Text>
-                  </View>
-                  <View style={styles.fractionBadge}>
-                    <Text style={[styles.fractionText, { color: colors.lavenderText }]}>{completedCount}/{totalCount}</Text>
-                  </View>
-                </View>
-                <Text style={[styles.featureTitle, { color: colors.lavenderText }]}>In Schedule</Text>
-                <Text style={[styles.featureSubText, { color: colors.lavenderText }]}>{pendingCount} task</Text>
-              </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={[styles.actionBadge, { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.85)' }]}
+              onPress={toggleTheme}
+            >
+              <Text style={styles.actionBadgeText}>{isDark ? '☀️' : '🌙'}</Text>
+            </TouchableOpacity>
 
-              {/* Orange/Peach Accent Card: Background #FFE8D6, primary text #FF6B00 */}
-              <View style={[styles.featureCard, { backgroundColor: colors.orangeCard }]}>
-                <View style={styles.featureCardHeader}>
-                  <View style={styles.featureIconBadge}>
-                    <Text style={styles.iconSymbol}>🔥</Text>
-                  </View>
-                  <View style={styles.fractionBadge}>
-                    <Text style={[styles.fractionText, { color: colors.orangeText }]}>{highPriorityCount}/{totalCount}</Text>
-                  </View>
-                </View>
-                <Text style={[styles.featureTitle, { color: colors.orangeText }]}>High Priorities</Text>
-                <Text style={[styles.featureSubText, { color: colors.orangeText }]}>{highPriorityCount} task</Text>
-              </View>
-            </ScrollView>
+            <TouchableOpacity
+              style={[styles.actionBadge, { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.85)' }]}
+              onPress={logout}
+            >
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-            {/* Status Filter Pills with Count Badges (Sky Blue #3B82F6 active) */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsScroll}>
-              {(['All', 'Today', 'Pending', 'High Priority', 'Completed'] as FilterOption[]).map((filter) => {
-                const count = getFilterCount(filter);
-                const isActive = activeFilter === filter;
-                return (
-                  <TouchableOpacity
-                    key={filter}
-                    style={[
-                      styles.filterPill,
-                      { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card },
-                      isActive && { backgroundColor: colors.primary, borderColor: colors.primary },
-                    ]}
-                    onPress={() => setActiveFilter(filter)}
-                  >
-                    <Text style={[styles.filterLabelText, { color: colors.text }, isActive && { color: '#ffffff', fontWeight: 'bold' }]}>
-                      {filter}
-                    </Text>
-                    <View style={[styles.countBadge, isActive && { backgroundColor: '#ffffff' }]}>
-                      <Text style={[styles.countBadgeText, isActive && { color: colors.primary }]}>{count}</Text>
-                    </View>
+        <FlatList
+          data={sortedTaskList}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <TaskItem
+              task={item}
+              onToggleComplete={toggleComplete}
+              onEdit={handleEditTask}
+              onDelete={deleteTask}
+              onStartFocus={handleStartFocus}
+              onToggleSubTask={toggleSubTask}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          ListHeaderComponent={
+            <View style={styles.dashboardTop}>
+              {/* Search Bar */}
+              <View style={[styles.searchContainer, { backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.9)', borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)' }]}>
+                <Text style={styles.searchIcon}>🔍</Text>
+                <TextInput
+                  style={[styles.searchInput, { color: colors.text }]}
+                  placeholder="Search a task....."
+                  placeholderTextColor={colors.textSecondary}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                {searchQuery ? (
+                  <TouchableOpacity onPress={() => setSearchQuery('')}>
+                    <Text style={[styles.clearSearch, { color: colors.textSecondary }]}>✕</Text>
                   </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                ) : null}
+              </View>
 
-            {/* Category Pills */}
-            {availableCategories.length > 1 ? (
+              {/* Feature Summary Cards (Vibrant Pastel Colors matching mesh theme) */}
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>this week</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsScroll}>
+                {/* Lavender Accent Card: Background #EAE3FF, primary text #5C3BFF */}
+                <View style={[styles.featureCard, { backgroundColor: colors.lavenderCard }]}>
+                  <View style={styles.featureCardHeader}>
+                    <View style={styles.featureIconBadge}>
+                      <Text style={styles.iconSymbol}>⏱️</Text>
+                    </View>
+                    <View style={styles.fractionBadge}>
+                      <Text style={[styles.fractionText, { color: colors.lavenderText }]}>{completedCount}/{totalCount}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.featureTitle, { color: colors.lavenderText }]}>In Schedule</Text>
+                  <Text style={[styles.featureSubText, { color: colors.lavenderText }]}>{pendingCount} task</Text>
+                </View>
+
+                {/* Orange/Peach Accent Card: Background #FFE8D6, primary text #FF6B00 */}
+                <View style={[styles.featureCard, { backgroundColor: colors.orangeCard }]}>
+                  <View style={styles.featureCardHeader}>
+                    <View style={styles.featureIconBadge}>
+                      <Text style={styles.iconSymbol}>🔥</Text>
+                    </View>
+                    <View style={styles.fractionBadge}>
+                      <Text style={[styles.fractionText, { color: colors.orangeText }]}>{highPriorityCount}/{totalCount}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.featureTitle, { color: colors.orangeText }]}>High Priorities</Text>
+                  <Text style={[styles.featureSubText, { color: colors.orangeText }]}>{highPriorityCount} task</Text>
+                </View>
+              </ScrollView>
+
+              {/* Status Filter Pills with Count Badges */}
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsScroll}>
-                {availableCategories.map((cat) => {
-                  const isActive = selectedCategory === cat;
+                {(['All', 'Today', 'Pending', 'High Priority', 'Completed'] as FilterOption[]).map((filter) => {
+                  const count = getFilterCount(filter);
+                  const isActive = activeFilter === filter;
                   return (
                     <TouchableOpacity
-                      key={cat}
+                      key={filter}
                       style={[
-                        styles.catPill,
-                        { borderColor: isDark ? colors.border : '#e2e8f0', backgroundColor: colors.card },
-                        isActive && { backgroundColor: '#10b981', borderColor: '#10b981' },
+                        styles.filterPill,
+                        { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.88)' },
+                        isActive && { backgroundColor: '#0284C7', borderColor: '#0284C7' },
                       ]}
-                      onPress={() => setSelectedCategory(cat)}
+                      onPress={() => setActiveFilter(filter)}
                     >
-                      <Text
-                        style={[
-                          styles.catText,
-                          { color: colors.text },
-                          isActive && { color: '#ffffff', fontWeight: 'bold' },
-                        ]}
-                      >
-                        📁 {cat}
+                      <Text style={[styles.filterLabelText, { color: colors.text }, isActive && { color: '#ffffff', fontWeight: 'bold' }]}>
+                        {filter}
                       </Text>
+                      <View style={[styles.countBadge, isActive && { backgroundColor: '#ffffff' }]}>
+                        <Text style={[styles.countBadgeText, isActive && { color: '#0284C7' }]}>{count}</Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
               </ScrollView>
-            ) : null}
 
-            <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 12 }]}>Today's task</Text>
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          </View>
-        }
-        ListEmptyComponent={
-          isLoading ? (
-            <View style={styles.centerContainer}>
-              <ActivityIndicator size="large" color={colors.primary} />
+              {/* Category Pills */}
+              {availableCategories.length > 1 ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsScroll}>
+                  {availableCategories.map((cat) => {
+                    const isActive = selectedCategory === cat;
+                    return (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[
+                          styles.catPill,
+                          { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.6)', backgroundColor: isDark ? colors.card : 'rgba(255, 255, 255, 0.85)' },
+                          isActive && { backgroundColor: '#10b981', borderColor: '#10b981' },
+                        ]}
+                        onPress={() => setSelectedCategory(cat)}
+                      >
+                        <Text
+                          style={[
+                            styles.catText,
+                            { color: colors.text },
+                            isActive && { color: '#ffffff', fontWeight: 'bold' },
+                          ]}
+                        >
+                          📁 {cat}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              ) : null}
+
+              <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 12 }]}>Today's task</Text>
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </View>
-          ) : (
-            <View style={styles.centerContainer}>
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                No tasks found. Tap the "+" button below to add your first task.
-              </Text>
-            </View>
-          )
-        }
-      />
+          }
+          ListEmptyComponent={
+            isLoading ? (
+              <View style={styles.centerContainer}>
+                <ActivityIndicator size="large" color="#0284C7" />
+              </View>
+            ) : (
+              <View style={styles.centerContainer}>
+                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                  No tasks found. Tap the "+" button below to add your first task.
+                </Text>
+              </View>
+            )
+          }
+        />
 
-      {/* Floating Action Button (FAB in Sky Blue #3B82F6) */}
-      <TouchableOpacity
-        style={[styles.fabButton, { backgroundColor: colors.primary }]}
-        onPress={handleAddTask}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabIcon}>+</Text>
-      </TouchableOpacity>
+        {/* Floating Action Button (FAB in Ocean Blue #0284C7) */}
+        <TouchableOpacity
+          style={[styles.fabButton, { backgroundColor: '#0284C7' }]}
+          onPress={handleAddTask}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </TouchableOpacity>
 
-      {/* Pomodoro Timer Modal */}
-      <PomodoroTimerModal
-        visible={showPomodoroModal}
-        task={focusTask}
-        onClose={() => {
-          setShowPomodoroModal(false);
-          setFocusTask(null);
-        }}
-      />
-    </SafeAreaView>
+        {/* Pomodoro Timer Modal */}
+        <PomodoroTimerModal
+          visible={showPomodoroModal}
+          task={focusTask}
+          onClose={() => {
+            setShowPomodoroModal(false);
+            setFocusTask(null);
+          }}
+        />
+      </SafeAreaView>
+    </AppBackground>
   );
 };
 
@@ -357,7 +360,7 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#ef4444',
+    color: '#EF4444',
   },
   dashboardTop: {
     paddingBottom: 4,
@@ -409,6 +412,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'space-between',
     minHeight: 130,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
   },
   featureCardHeader: {
     flexDirection: 'row',
@@ -467,7 +475,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -500,8 +508,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
-    color: '#ef4444',
-    backgroundColor: '#fee2e2',
+    color: '#EF4444',
+    backgroundColor: '#FEE2E2',
     padding: 8,
     marginHorizontal: 16,
     marginTop: 8,
@@ -518,7 +526,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,
-    shadowColor: '#3B82F6',
+    shadowColor: '#0284C7',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
