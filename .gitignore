@@ -2,7 +2,11 @@ node_modules/
 .env
 *.log
 .DS_Store
+.idea/
+*.cxx
+.cxx/
 mobile/android/.gradle/
 mobile/android/app/build/
 mobile/android/build/
 mobile/ios/Pods/
+

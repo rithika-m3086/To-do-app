@@ -49,28 +49,49 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 function AppContent() {
-  const { isDark } = useTheme();
-  return (
-    <>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <RootNavigator />
-    </>
-  );
+  try {
+    const { isDark } = useTheme();
+    return (
+      <>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <RootNavigator />
+      </>
+    );
+  } catch (err) {
+    console.error('AppContent initialization error:', err);
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>Initialization Error</Text>
+        <Text style={styles.errorMessage}>{String(err)}</Text>
+      </View>
+    );
+  }
 }
 
 function App(): React.JSX.Element {
-  return (
-    <ErrorBoundary>
-      <SafeAreaProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </ErrorBoundary>
-  );
+  try {
+    return (
+      <ErrorBoundary>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </ErrorBoundary>
+    );
+  } catch (err) {
+    console.error('App boot error:', err);
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>Boot Error</Text>
+        <Text style={styles.errorMessage}>{String(err)}</Text>
+      </View>
+    );
+  }
 }
+
 
 const styles = StyleSheet.create({
   errorContainer: {

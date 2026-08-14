@@ -53,11 +53,6 @@ android {
     }
 }
 
-tasks.whenTaskAdded { task ->
-    if (task.name.contains("CMake")) {
-        task.enabled = false
-    }
-}
 
 dependencies {
     implementation("com.facebook.react:react-android")
